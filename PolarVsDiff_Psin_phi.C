@@ -27,7 +27,7 @@ const Double_t alpha_LamBar = -0.732;
 TGraphErrors* ConvertProfToGraph(TProfile* prof);
 
 void PolarVsDiff_Psin_phi(){
-    TFile *input = new TFile("", "read");
+    TFile *input = new TFile("../Files/14p5GeV/output_Polar_14p5.root", "read");
 
     TH1F *CosOfDiffFlatt_1 = (TH1F*)input->Get("CosOfDiff_1");
 
@@ -108,16 +108,20 @@ void PolarVsDiff_Psin_phi(){
     TGraphErrors *grSin_diffPhiPsi1Sin_theta_LamBar[9][2];
     TGraphErrors *grCos_diffPhiPsi1Sin_theta_LamBar[9][2];
 
-    TCanvas *c[24];
+    /*TCanvas *c[24];
     for(int i=0; i!=24; i++){
         c[i] = new TCanvas(Form("c_%i", i), Form("c_%i", i), 0, 1024, 1200, 1024);
         c[i]->Divide(3,3);
-    }
+    }*/
+
+    TGaxis::SetMaxDigits(1);
+
 
     int cent_lim[10] = {0, 5, 10, 20, 30, 40, 50, 60, 70, 80};
 
-    for(int iCent=0; iCent!=9; iCent++){
+    /*for(int iCent=0; iCent!=9; iCent++){
         for(int iSub=0; iSub!=2; iSub++){
+            
             grSin_diffPhiPsi1[iCent][iSub] = ConvertProfToGraph(prSin_diffPhiPsi1[iCent][iSub]);
             grCos_diffPhiPsi1[iCent][iSub] = ConvertProfToGraph(prCos_diffPhiPsi1[iCent][iSub]);
             grCos_theta[iCent][iSub] = ConvertProfToGraph(prCos_theta[iCent][iSub]);
@@ -134,6 +138,7 @@ void PolarVsDiff_Psin_phi(){
 
             //Set Y titles
             grSin_diffPhiPsi1[iCent][iSub]->GetYaxis()->SetTitle("<sin(#phi_{#Lambda}-#Psi_{1})>");
+            grSin_diffPhiPsi1[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
             grCos_diffPhiPsi1[iCent][iSub]->GetYaxis()->SetTitle("<cos(#phi_{#Lambda}-#Psi_{1})>");
             grCos_theta[iCent][iSub]->GetYaxis()->SetTitle("<cos(#theta)>");
             grSin_theta[iCent][iSub]->GetYaxis()->SetTitle("<sin(#theta)>");
@@ -161,46 +166,129 @@ void PolarVsDiff_Psin_phi(){
             grSin_theta_LamBar[iCent][iSub]->SetTitle(Form("#bar{#Lambda} centrality, %i-%i", cent_lim[8-iCent], cent_lim[9-iCent]));
             grSin_diffPhiPsi1Sin_theta_LamBar[iCent][iSub]->SetTitle(Form("#bar{#Lambda} centrality, %i-%i", cent_lim[8-iCent], cent_lim[9-iCent]));
             grCos_diffPhiPsi1Sin_theta_LamBar[iCent][iSub]->SetTitle(Form("#bar{#Lambda} centrality, %i-%i", cent_lim[8-iCent], cent_lim[9-iCent]));
+            
 
             //Drawing
-            c[iSub]->cd(iCent+1);
-            grSin_diffPhiPsi1[8-iCent][iSub]->Draw("AP");
-
-            c[iSub+2]->cd(iCent+1);
-            grCos_diffPhiPsi1[8-iCent][iSub]->Draw("AP");
-
-            c[iSub+4]->cd(iCent+1);
-            grCos_theta[8-iCent][iSub]->Draw("AP");
+            c[iSub]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grSin_diffPhiPsi1[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grSin_diffPhiPsi1[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grSin_diffPhiPsi1[iCent][iSub]->Draw("AP");
             
-            c[iSub+6]->cd(iCent+1);
-            grSin_theta[8-iCent][iSub]->Draw("AP");
 
-            c[iSub+8]->cd(iCent+1);
-            grSin_diffPhiPsi1Sin_theta[8-iCent][iSub]->Draw("AP");
+            c[iSub+2]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grCos_diffPhiPsi1[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grCos_diffPhiPsi1[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grCos_diffPhiPsi1[iCent][iSub]->Draw("AP");
+            
 
-            c[iSub+10]->cd(iCent+1);
-            grCos_diffPhiPsi1Sin_theta[8-iCent][iSub]->Draw("AP");
+            c[iSub+4]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grCos_theta[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grCos_theta[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grCos_theta[iCent][iSub]->Draw("AP");
+            
+            
+            c[iSub+6]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grSin_theta[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grSin_theta[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grSin_theta[iCent][iSub]->Draw("AP");
+            
+
+            c[iSub+8]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grSin_diffPhiPsi1Sin_theta[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grSin_diffPhiPsi1Sin_theta[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grSin_diffPhiPsi1Sin_theta[iCent][iSub]->Draw("AP");
+            
+
+            c[iSub+10]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grCos_diffPhiPsi1Sin_theta[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grCos_diffPhiPsi1Sin_theta[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grCos_diffPhiPsi1Sin_theta[iCent][iSub]->Draw("AP");
+            
 
             //LamBar
-            c[iSub+12]->cd(iCent+1);
-            grSin_diffPhiPsi1_LamBar[8-iCent][iSub]->Draw("AP");
+            c[iSub+12]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grSin_diffPhiPsi1_LamBar[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grSin_diffPhiPsi1_LamBar[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grSin_diffPhiPsi1_LamBar[iCent][iSub]->Draw("AP");
+            
 
-            c[iSub+14]->cd(iCent+1);
-            grCos_diffPhiPsi1_LamBar[8-iCent][iSub]->Draw("AP");
+            c[iSub+14]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grCos_diffPhiPsi1_LamBar[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grCos_diffPhiPsi1_LamBar[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grCos_diffPhiPsi1_LamBar[iCent][iSub]->Draw("AP");
+            
 
-            c[iSub+16]->cd(iCent+1);
-            grCos_theta_LamBar[8-iCent][iSub]->Draw("AP");
+            c[iSub+16]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grCos_theta_LamBar[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grCos_theta_LamBar[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grCos_theta_LamBar[iCent][iSub]->Draw("AP");
+            
 
-            c[iSub+18]->cd(iCent+1);
-            grSin_theta_LamBar[8-iCent][iSub]->Draw("AP");
+            c[iSub+18]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grSin_theta_LamBar[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grSin_theta_LamBar[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grSin_theta_LamBar[iCent][iSub]->Draw("AP");
+            
 
-            c[iSub+20]->cd(iCent+1);
-            grSin_diffPhiPsi1Sin_theta_LamBar[8-iCent][iSub]->Draw("AP");
+            c[iSub+20]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grSin_diffPhiPsi1Sin_theta_LamBar[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grSin_diffPhiPsi1Sin_theta_LamBar[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grSin_diffPhiPsi1Sin_theta_LamBar[iCent][iSub]->Draw("AP");
 
-            c[iSub+22]->cd(iCent+1);
-            grCos_diffPhiPsi1Sin_theta_LamBar[8-iCent][iSub]->Draw("AP");
+            c[iSub+22]->cd(9-iCent);
+            if(iCent == 2 || iCent == 5 || iCent == 8){
+                gPad->SetLeftMargin(0.25);
+                gPad->SetRightMargin(0.02);
+                grCos_diffPhiPsi1Sin_theta_LamBar[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grCos_diffPhiPsi1Sin_theta_LamBar[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+            }
+            grCos_diffPhiPsi1Sin_theta_LamBar[iCent][iSub]->Draw("AP");
         }
-    }
+    }*/
 
     //20-50% range centrality drawing
     TProfile *prSin_diffPhiPsi1_20_50[2];
@@ -297,6 +385,7 @@ void PolarVsDiff_Psin_phi(){
         grSin_diffPhiPsi1_20_50[iSub]->SetMarkerColor(kRed);
         grSin_diffPhiPsi1_20_50[iSub]->SetMarkerStyle(29);
         grSin_diffPhiPsi1_20_50[iSub]->SetLineColor(kRed);
+        grSin_diffPhiPsi1_20_50[iSub]->Scale(0.85);
 
         grCos_diffPhiPsi1_20_50[iSub]->SetMarkerColor(kRed);
         grCos_diffPhiPsi1_20_50[iSub]->SetMarkerStyle(29);
@@ -310,18 +399,19 @@ void PolarVsDiff_Psin_phi(){
         grSin_theta_20_50[iSub]->SetMarkerStyle(29);
         grSin_theta_20_50[iSub]->SetLineColor(kRed);
 
-        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerColor(kRed);
-        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerStyle(29);
-        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetLineColor(kRed);
+        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerColor(kBlue);
+        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerStyle(30);
+        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetLineColor(kBlue);
 
         grCos_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerColor(kRed);
         grCos_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerStyle(29);
         grCos_diffPhiPsi1Sin_theta_20_50[iSub]->SetLineColor(kRed);
 
         //LamBar
-        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerColor(kBlue);
-        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerStyle(30);
-        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetLineColor(kBlue);
+        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerColor(kRed);
+        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerStyle(34);
+        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetLineColor(kRed);
+        grSin_diffPhiPsi1_LamBar_20_50[iSub]->Scale(0.85);
 
         grCos_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerColor(kBlue);
         grCos_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerStyle(30);
@@ -336,7 +426,7 @@ void PolarVsDiff_Psin_phi(){
         grSin_theta_LamBar_20_50[iSub]->SetLineColor(kBlue);
 
         grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetMarkerColor(kBlue);
-        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetMarkerStyle(30);
+        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetMarkerStyle(28);
         grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetLineColor(kBlue);
 
         grCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetMarkerColor(kBlue);
@@ -361,11 +451,20 @@ void PolarVsDiff_Psin_phi(){
     for(int iSub=0; iSub!=2; iSub++){
         leg[iSub] = new TLegend();
 
-        leg[iSub]->AddEntry(grSin_diffPhiPsi1_20_50[0], "#Lambda", "p");
-        leg[iSub]->AddEntry(grSin_diffPhiPsi1_LamBar_20_50[0], "#bar{#Lambda}", "p");
+        leg[iSub]->AddEntry(grCos_theta_20_50[0], "#Lambda", "p");
+        leg[iSub]->AddEntry(grCos_theta_LamBar_20_50[0], "#bar{#Lambda}", "p");
         leg[iSub]->AddEntry((TObject*)0, "20-50 \% centrality", "");
         leg[iSub]->SetBorderSize(0);
     }
+
+    TLegend *leg_check = new TLegend();
+
+    leg_check->AddEntry(grSin_diffPhiPsi1_20_50[0], "#Lambda <sin(#phi-#Psi)>", "p");
+    leg_check->AddEntry(grSin_diffPhiPsi1_LamBar_20_50[0], "#bar{#Lambda} <sin(#phi-#Psi)>", "p");
+    leg_check->AddEntry(grSin_diffPhiPsi1Sin_theta_20_50[0], "#Lambda <sin(#phi-#Psi)sin(#theta)", "p");
+    leg_check->AddEntry(grSin_diffPhiPsi1Sin_theta_LamBar_20_50[0], "#bar{#Lambda} <sin(#phi-#Psi)sin(#theta)", "p");
+    leg_check->AddEntry((TObject*)0, "20-50 \% centrality", "");
+    leg_check->SetBorderSize(0);
 
     leg[0]->AddEntry((TObject*)0, "Psi_comb was used", "");
     leg[1]->AddEntry((TObject*)0, "Psi_e/w was used", "");
@@ -381,6 +480,8 @@ void PolarVsDiff_Psin_phi(){
         //
         mgSin_diffPhiPsi1_20_50[iSub]->Add(grSin_diffPhiPsi1_20_50[iSub]);
         mgSin_diffPhiPsi1_20_50[iSub]->Add(grSin_diffPhiPsi1_LamBar_20_50[iSub]);
+        mgSin_diffPhiPsi1_20_50[iSub]->Add(grSin_diffPhiPsi1Sin_theta_20_50[iSub]);
+        mgSin_diffPhiPsi1_20_50[iSub]->Add(grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]);
 
         //
         mgCos_diffPhiPsi1_20_50[iSub]->Add(grCos_diffPhiPsi1_20_50[iSub]);
@@ -424,27 +525,33 @@ void PolarVsDiff_Psin_phi(){
         //Drawing
         can[iSub]->cd();
         mgSin_diffPhiPsi1_20_50[iSub]->Draw("AP");
-        leg[iSub]->Draw("same");
+        leg_check->Draw("same");
+        funcOfZero->Draw("same");
 
         can[iSub+2]->cd();
         mgCos_diffPhiPsi1_20_50[iSub]->Draw("AP");
         leg[iSub]->Draw("same");
+        funcOfZero->Draw("same");
 
         can[iSub+4]->cd();
         mgCos_theta_20_50[iSub]->Draw("AP");
         leg[iSub]->Draw("same");
+        funcOfZero->Draw("same");
 
         can[iSub+6]->cd();
         mgSin_theta_20_50[iSub]->Draw("AP");
         leg[iSub]->Draw("same");
+        funcOfZero->Draw("same");
 
         can[iSub+8]->cd();
         mgSin_diffPhiPsi1Sin_theta_20_50[iSub]->Draw("AP");
         leg[iSub]->Draw("same");
+        funcOfZero->Draw("same");
 
         can[iSub+10]->cd();
         mgCos_diffPhiPsi1Sin_theta_20_50[iSub]->Draw("AP");
         leg[iSub]->Draw("same");
+        funcOfZero->Draw("same");
 
     }
 }

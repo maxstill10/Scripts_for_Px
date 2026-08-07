@@ -25,6 +25,12 @@ const Double_t alpha_Lam = 0.732;
 const Double_t alpha_LamBar = -0.732;
 
 TGraphErrors* ConvertProfToGraph(TProfile* prof);
+double GetCoef(double x, TF1 *Sig, TF1 *Bg);
+double MyFitFunc(double *x, double *par);
+TGraphErrors* GetCosTetaSub(TProfile* prof, TGraphErrors* graph);
+
+TF1 *FuncGausKFP = new TF1("FuncGausKFP", "gaus(0)+gaus(3)", 1.1, 1.13);
+TF1 *LineKFP = new TF1("LineKFP", "[0] + [1]*x", 1.1, 1.13);
 
 void PolarVsDiff_Psin_phi(){
     TFile *input = new TFile("../Files/14p5GeV/output_Polar_14p5.root", "read");
@@ -62,36 +68,46 @@ void PolarVsDiff_Psin_phi(){
     funcOfZero->SetLineColor(1);
     funcOfZero->SetLineWidth(1);
 
-    TProfile *prSin_diffPhiPsi1[9][2];
-    TProfile *prCos_diffPhiPsi1[9][2];
-    TProfile *prCos_theta[9][2];
-    TProfile *prSin_theta[9][2];
-    TProfile *prSin_diffPhiPsi1Sin_theta[9][2];
-    TProfile *prCos_diffPhiPsi1Sin_theta[9][2];
+    TProfile *prSin_diffPhiPsi1[9][6][2];
+    TProfile *prCos_diffPhiPsi1[9][6][2];
+    TProfile *prCos_theta[9][6][2];
+    TProfile *prSin_theta[9][6][2];
+    TProfile *prSin_diffPhiPsi1Sin_theta[9][6][2];
+    TProfile *prCos_diffPhiPsi1Sin_theta[9][6][2];
 
-    TProfile *prSin_diffPhiPsi1_LamBar[9][2];
-    TProfile *prCos_diffPhiPsi1_LamBar[9][2];
-    TProfile *prCos_theta_LamBar[9][2];
-    TProfile *prSin_theta_LamBar[9][2];
-    TProfile *prSin_diffPhiPsi1Sin_theta_LamBar[9][2];
-    TProfile *prCos_diffPhiPsi1Sin_theta_LamBar[9][2];
+    TProfile *prSin_diffPhiPsi1_LamBar[9][6][2];
+    TProfile *prCos_diffPhiPsi1_LamBar[9][6][2];
+    TProfile *prCos_theta_LamBar[9][6][2];
+    TProfile *prSin_theta_LamBar[9][6][2];
+    TProfile *prSin_diffPhiPsi1Sin_theta_LamBar[9][6][2];
+    TProfile *prCos_diffPhiPsi1Sin_theta_LamBar[9][6][2];
+
+    TH1F *InvMLamDist[9][6][2];
+    TH1F *InvMLamBarDist[9][6][2];
 
     for(int iCent=0; iCent!=9; iCent++){
-        for(int iSub=0; iSub!=2; iSub++){
-            prSin_diffPhiPsi1[iCent][iSub] = (TProfile*)input->Get(Form("prSin_diffPhiPsi1_%i_%i", iCent, iSub));
-            prCos_diffPhiPsi1[iCent][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1_%i_%i", iCent, iSub));
-            prCos_theta[iCent][iSub] = (TProfile*)input->Get(Form("prCos_theta_%i_%i", iCent, iSub));
-            prSin_theta[iCent][iSub] = (TProfile*)input->Get(Form("prSin_theta_%i_%i", iCent, iSub));
-            prSin_diffPhiPsi1Sin_theta[iCent][iSub] = (TProfile*)input->Get(Form("prSin_diffPhiPsi1Sin_theta_%i_%i", iCent, iSub));
-            prCos_diffPhiPsi1Sin_theta[iCent][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1Sin_theta_%i_%i", iCent, iSub));
+        for(int iphi=0; iphi!=6; iphi++){
+            for(int iSub=0; iSub!=2; iSub++){
+                prSin_diffPhiPsi1[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prSin_diffPhiPsi1_%i_%i%i", iCent, iphi, iSub));
+                prCos_diffPhiPsi1[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1_%i_%i_%i", iCent, iphi, iSub));
+                prCos_theta[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_theta_%i_%i_%i", iCent, iphi, iSub));
+                prSin_theta[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prSin_theta_%i_%i_%i", iCent, iphi, iSub));
+                prSin_diffPhiPsi1Sin_theta[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prSin_diffPhiPsi1Sin_theta_%i_%i_%i", iCent, iphi, iSub));
+                prCos_diffPhiPsi1Sin_theta[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1Sin_theta_%i_%i_%i", iCent, iphi, iSub));
 
-            prSin_diffPhiPsi1_LamBar[iCent][iSub] = (TProfile*)input->Get(Form("prSin_diffPhiPsi1_LamBar_%i_%i", iCent, iSub));
-            prCos_diffPhiPsi1_LamBar[iCent][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1_LamBar_%i_%i", iCent, iSub));
-            prCos_theta_LamBar[iCent][iSub] = (TProfile*)input->Get(Form("prCos_theta_LamBar_%i_%i", iCent, iSub));
-            prSin_theta_LamBar[iCent][iSub] = (TProfile*)input->Get(Form("prSin_theta_LamBar_%i_%i", iCent, iSub));
-            prSin_diffPhiPsi1Sin_theta_LamBar[iCent][iSub] = (TProfile*)input->Get(Form("prSin_diffPhiPsi1Sin_theta_LamBar_%i_%i", iCent, iSub));
-            prCos_diffPhiPsi1Sin_theta_LamBar[iCent][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1Sin_theta_LamBar_%i_%i", iCent, iSub));
+                prSin_diffPhiPsi1_LamBar[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prSin_diffPhiPsi1_LamBar_%i_%i_%i", iCent, iphi, iSub));
+                prCos_diffPhiPsi1_LamBar[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1_LamBar_%i_%i_%i", iCent, iphi, iSub));
+                prCos_theta_LamBar[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_theta_LamBar_%i_%i_%i", iCent, iphi, iSub));
+                prSin_theta_LamBar[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prSin_theta_LamBar_%i_%i_%i", iCent, iphi, iSub));
+                prSin_diffPhiPsi1Sin_theta_LamBar[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prSin_diffPhiPsi1Sin_theta_LamBar_%i_%i_%i", iCent, iphi, iSub));
+                prCos_diffPhiPsi1Sin_theta_LamBar[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1Sin_theta_LamBar_%i_%i_%i", iCent, iphi, iSub));
+
+                //lam invM dist
+                InvMLamDist[iCent][iphi][iSub] = (TH1F*)input->Get(Form("InvMLamDist_%i_%i_%i", iCent, iphi, iSub));
+                InvMLamBarDist[iCent][iphi][iSub] = (TH1F*)input->Get(Form("InvMLamBarDist_%i_%i_%i", iCent, iphi, iSub));
+            }
         }
+        
     }
 
     TGraphErrors *grSin_diffPhiPsi1[9][2];
@@ -290,68 +306,163 @@ void PolarVsDiff_Psin_phi(){
         }
     }*/
 
-    //20-50% range centrality drawing
-    TProfile *prSin_diffPhiPsi1_20_50[2];
-    TProfile *prCos_diffPhiPsi1_20_50[2];
-    TProfile *prCos_theta_20_50[2];
-    TProfile *prSin_theta_20_50[2];
-    TProfile *prSin_diffPhiPsi1Sin_theta_20_50[2];
-    TProfile *prCos_diffPhiPsi1Sin_theta_20_50[2];
+    //........................20-50% range centrality drawing.......................
 
-    TProfile *prSin_diffPhiPsi1_LamBar_20_50[2];
-    TProfile *prCos_diffPhiPsi1_LamBar_20_50[2];
-    TProfile *prCos_theta_LamBar_20_50[2];
-    TProfile *prSin_theta_LamBar_20_50[2];
-    TProfile *prSin_diffPhiPsi1Sin_theta_LamBar_20_50[2];
-    TProfile *prCos_diffPhiPsi1Sin_theta_LamBar_20_50[2];
+    //20-50% range cetrality merging
+    TProfile *prSin_diffPhiPsi1_20_50[6][2];
+    TProfile *prCos_diffPhiPsi1_20_50[6][2];
+    TProfile *prCos_theta_20_50[6][2];
+    TProfile *prSin_theta_20_50[6][2];
+    TProfile *prSin_diffPhiPsi1Sin_theta_20_50[6][2];
+    TProfile *prCos_diffPhiPsi1Sin_theta_20_50[6][2];
+
+    TProfile *prSin_diffPhiPsi1_LamBar_20_50[6][2];
+    TProfile *prCos_diffPhiPsi1_LamBar_20_50[6][2];
+    TProfile *prCos_theta_LamBar_20_50[6][2];
+    TProfile *prSin_theta_LamBar_20_50[6][2];
+    TProfile *prSin_diffPhiPsi1Sin_theta_LamBar_20_50[6][2];
+    TProfile *prCos_diffPhiPsi1Sin_theta_LamBar_20_50[6][2];
+
+    //lam invM dist
+    TH1F *InvMLamDist_20_50[6][2];
+    TH1F *InvMLamBarDist_20_50[6][2];
 
     for(int iSub=0; iSub!=2; iSub++){
-        prSin_diffPhiPsi1_20_50[iSub] = (TProfile*)prSin_diffPhiPsi1[0][iSub]->Clone();
-        prSin_diffPhiPsi1_20_50[iSub]->Reset();
-        prCos_diffPhiPsi1_20_50[iSub] = (TProfile*)prCos_diffPhiPsi1[0][iSub]->Clone();
-        prCos_diffPhiPsi1_20_50[iSub]->Reset();
-        prCos_theta_20_50[iSub] = (TProfile*)prCos_theta[0][iSub]->Clone();
-        prCos_theta_20_50[iSub]->Reset();
-        prSin_theta_20_50[iSub] = (TProfile*)prSin_theta[0][iSub]->Clone();
-        prSin_theta_20_50[iSub]->Reset();
-        prSin_diffPhiPsi1Sin_theta_20_50[iSub] = (TProfile*)prSin_diffPhiPsi1Sin_theta[0][iSub]->Clone();
-        prSin_diffPhiPsi1Sin_theta_20_50[iSub]->Reset();
-        prCos_diffPhiPsi1Sin_theta_20_50[iSub] = (TProfile*)prCos_diffPhiPsi1Sin_theta[0][iSub]->Clone();
-        prCos_diffPhiPsi1Sin_theta_20_50[iSub]->Reset();
+        for(int iphi=0; iphi!=6; iphi++){
+            prSin_diffPhiPsi1_20_50[iphi][iSub] = (TProfile*)prSin_diffPhiPsi1[0][iphi][iSub]->Clone();
+            prSin_diffPhiPsi1_20_50[iphi][iSub]->Reset();
+            prCos_diffPhiPsi1_20_50[iphi][iSub] = (TProfile*)prCos_diffPhiPsi1[0][iphi][iSub]->Clone();
+            prCos_diffPhiPsi1_20_50[iphi][iSub]->Reset();
+            prCos_theta_20_50[iphi][iSub] = (TProfile*)prCos_theta[0][iphi][iSub]->Clone();
+            prCos_theta_20_50[iphi][iSub]->Reset();
+            prSin_theta_20_50[iphi][iSub] = (TProfile*)prSin_theta[0][iphi][iSub]->Clone();
+            prSin_theta_20_50[iphi][iSub]->Reset();
+            prSin_diffPhiPsi1Sin_theta_20_50[iphi][iSub] = (TProfile*)prSin_diffPhiPsi1Sin_theta[0][iphi][iSub]->Clone();
+            prSin_diffPhiPsi1Sin_theta_20_50[iphi][iSub]->Reset();
+            prCos_diffPhiPsi1Sin_theta_20_50[iphi][iSub] = (TProfile*)prCos_diffPhiPsi1Sin_theta[0][iphi][iSub]->Clone();
+            prCos_diffPhiPsi1Sin_theta_20_50[iphi][iSub]->Reset();
 
-        prSin_diffPhiPsi1_LamBar_20_50[iSub] = (TProfile*)prSin_diffPhiPsi1_LamBar[0][iSub]->Clone();
-        prSin_diffPhiPsi1_LamBar_20_50[iSub]->Reset();
-        prCos_diffPhiPsi1_LamBar_20_50[iSub] = (TProfile*)prCos_diffPhiPsi1_LamBar[0][iSub]->Clone();
-        prCos_diffPhiPsi1_LamBar_20_50[iSub]->Reset();
-        prCos_theta_LamBar_20_50[iSub] = (TProfile*)prCos_theta_LamBar[0][iSub]->Clone();
-        prCos_theta_LamBar_20_50[iSub]->Reset();
-        prSin_theta_LamBar_20_50[iSub] = (TProfile*)prSin_theta_LamBar[0][iSub]->Clone();
-        prSin_theta_LamBar_20_50[iSub]->Reset();
-        prSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub] = (TProfile*)prSin_diffPhiPsi1Sin_theta_LamBar[0][iSub]->Clone();
-        prSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->Reset();
-        prCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub] = (TProfile*)prCos_diffPhiPsi1Sin_theta_LamBar[0][iSub]->Clone();
-        prCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->Reset();
+            prSin_diffPhiPsi1_LamBar_20_50[iphi][iSub] = (TProfile*)prSin_diffPhiPsi1_LamBar[0][iphi][iSub]->Clone();
+            prSin_diffPhiPsi1_LamBar_20_50[iphi][iSub]->Reset();
+            prCos_diffPhiPsi1_LamBar_20_50[iphi][iSub] = (TProfile*)prCos_diffPhiPsi1_LamBar[0][iphi][iSub]->Clone();
+            prCos_diffPhiPsi1_LamBar_20_50[iphi][iSub]->Reset();
+            prCos_theta_LamBar_20_50[iphi][iSub] = (TProfile*)prCos_theta_LamBar[0][iphi][iSub]->Clone();
+            prCos_theta_LamBar_20_50[iphi][iSub]->Reset();
+            prSin_theta_LamBar_20_50[iphi][iSub] = (TProfile*)prSin_theta_LamBar[0][iphi][iSub]->Clone();
+            prSin_theta_LamBar_20_50[iphi][iSub]->Reset();
+            prSin_diffPhiPsi1Sin_theta_LamBar_20_50[iphi][iSub] = (TProfile*)prSin_diffPhiPsi1Sin_theta_LamBar[0][iphi][iSub]->Clone();
+            prSin_diffPhiPsi1Sin_theta_LamBar_20_50[iphi][iSub]->Reset();
+            prCos_diffPhiPsi1Sin_theta_LamBar_20_50[iphi][iSub] = (TProfile*)prCos_diffPhiPsi1Sin_theta_LamBar[0][iphi][iSub]->Clone();
+            prCos_diffPhiPsi1Sin_theta_LamBar_20_50[iphi][iSub]->Reset();
+
+            //lam invM dist
+            InvMLamDist_20_50[iphi][iSub] = (TH1F*)InvMLamDist[0][iphi][iSub]->Clone();
+            InvMLamDist_20_50[iphi][iSub]->Reset();
+            InvMLamBarDist_20_50[iphi][iSub] = (TH1F*)InvMLamBarDist[0][iphi][iSub]->Clone();
+            InvMLamBarDist_20_50[iphi][iSub]->Reset();
+
+            for(int iCent = 3; iCent!=6; iCent++){
+                prSin_diffPhiPsi1_20_50[iphi][iSub]->Add(prSin_diffPhiPsi1[iCent][iphi][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
+                prCos_diffPhiPsi1_20_50[iphi][iSub]->Add(prCos_diffPhiPsi1[iCent][iphi][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
+                prCos_theta_20_50[iphi][iSub]->Add(prCos_theta[iCent][iphi][iSub]);
+                prSin_theta_20_50[iphi][iSub]->Add(prSin_theta[iCent][iphi][iSub]);
+                prSin_diffPhiPsi1Sin_theta_20_50[iphi][iSub]->Add(prSin_diffPhiPsi1Sin_theta[iCent][iphi][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
+                prCos_diffPhiPsi1Sin_theta_20_50[iphi][iSub]->Add(prCos_diffPhiPsi1Sin_theta[iCent][iphi][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
+
+                prSin_diffPhiPsi1_LamBar_20_50[iphi][iSub]->Add(prSin_diffPhiPsi1_LamBar[iCent][iphi][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
+                prCos_diffPhiPsi1_LamBar_20_50[iphi][iSub]->Add(prCos_diffPhiPsi1_LamBar[iCent][iphi][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
+                prCos_theta_LamBar_20_50[iphi][iSub]->Add(prCos_theta_LamBar[iCent][iphi][iSub]);
+                prSin_theta_LamBar_20_50[iphi][iSub]->Add(prSin_theta_LamBar[iCent][iphi][iSub]);
+                prSin_diffPhiPsi1Sin_theta_LamBar_20_50[iphi][iSub]->Add(prSin_diffPhiPsi1Sin_theta_LamBar[iCent][iphi][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
+                prCos_diffPhiPsi1Sin_theta_LamBar_20_50[iphi][iSub]->Add(prCos_diffPhiPsi1Sin_theta_LamBar[iCent][iphi][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
+
+                //lam invM dist
+                InvMLamDist_20_50[iphi][iSub]->Add(InvMLamDist[iCent][iphi][iSub]);
+                InvMLamBarDist_20_50[iphi][iSub]->Add(InvMLamBarDist[iCent][iphi][iSub]);
+            }        
+        }       
     }
 
-    for(int iCent = 3; iCent<=5; iCent++){
-        for(int iSub=0; iSub!=2; iSub++){
-            prSin_diffPhiPsi1_20_50[iSub]->Add(prSin_diffPhiPsi1[iCent][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
-            prCos_diffPhiPsi1_20_50[iSub]->Add(prCos_diffPhiPsi1[iCent][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
-            prCos_theta_20_50[iSub]->Add(prCos_theta[iCent][iSub]);
-            prSin_theta_20_50[iSub]->Add(prSin_theta[iCent][iSub]);
-            prSin_diffPhiPsi1Sin_theta_20_50[iSub]->Add(prSin_diffPhiPsi1Sin_theta[iCent][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
-            prCos_diffPhiPsi1Sin_theta_20_50[iSub]->Add(prCos_diffPhiPsi1Sin_theta[iCent][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
+    //...................................Fitting by invM..................................
+    double Pz, Pz_err;
 
-            prSin_diffPhiPsi1_LamBar_20_50[iSub]->Add(prSin_diffPhiPsi1_LamBar[iCent][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
-            prCos_diffPhiPsi1_LamBar_20_50[iSub]->Add(prCos_diffPhiPsi1_LamBar[iCent][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
-            prCos_theta_LamBar_20_50[iSub]->Add(prCos_theta_LamBar[iCent][iSub]);
-            prSin_theta_LamBar_20_50[iSub]->Add(prSin_theta_LamBar[iCent][iSub]);
-            prSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->Add(prSin_diffPhiPsi1Sin_theta_LamBar[iCent][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
-            prCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->Add(prCos_diffPhiPsi1Sin_theta_LamBar[iCent][iSub], Res_1VsCent[iSub]->GetPointY(8-iCent));
-        }
+    //Canvas init
+    TCanvas *c_lam_20_50[2];
+    TCanvas *c_lamBar_20_50[2];
+
+    TCanvas *c_Sin_diffPhiPsi1_20_50[2];
+    TCanvas *c_Sin_diffPhiPsi1_LamBar_20_50[2];
+
+    TCanvas *c_Cos_diffPhiPsi1_20_50[2];
+    TCanvas *c_Cos_diffPhiPsi1_LamBar_20_50[2];
+
+    TCanvas *c_Cos_theta_20_50[2];
+    TCanvas *c_Cos_theta_LamBar_20_50[2];
+
+    TCanvas *c_Sin_theta_20_50[2];
+    TCanvas *c_Sin_theta_LamBar_20_50[2];
+
+    TCanvas *c_Sin_diffPhiPsi1Sin_theta_20_50[2];
+    TCanvas *c_Sin_diffPhiPsi1Sin_theta_LamBar_20_50[2];
+
+    TCanvas *c_Cos_diffPhiPsi1Sin_theta_20_50[2];
+    TCanvas *c_Cos_diffPhiPsi1Sin_theta_LamBar_20_50[2];
+
+    for(int iSub=0; iSub!=2; iSub++){
+        c_lam_20_50[iSub] = new TCanvas(Form("c_lam_20_50_%i", iSub), Form("c_lam_20_50_%i", iSub), 0, 1024, 1800, 1024);
+        c_lamBar_20_50[iSub] = new TCanvas(Form("c_lamBar_20_50_%i", iSub), Form("c_lamBar_20_50_%i", iSub), 0, 1024, 1800, 1024);
+
+        c_Sin_diffPhiPsi1_20_50[iSub] = new TCanvas(Form("c_Sin_diffPhiPsi1_20_50_%i", iSub), Form("c_Sin_diffPhiPsi1_20_50_%i", iSub), 0, 1024, 1800, 1024);
+        c_Sin_diffPhiPsi1_LamBar_20_50[iSub] = new TCanvas(Form("c_Sin_diffPhiPsi1_LamBar_20_50_%i", iSub), Form("c_Sin_diffPhiPsi1_LamBar_20_50_%i", iSub), 0, 1024, 1800, 1024);
+
+        c_Cos_diffPhiPsi1_20_50[iSub] = new TCanvas(Form("c_Cos_diffPhiPsi1_20_50_%i", iSub), Form("c_Cos_diffPhiPsi1_20_50_%i", iSub), 0, 1024, 1800, 1024);
+        c_Cos_diffPhiPsi1_LamBar_20_50[iSub] = new TCanvas(Form("c_Cos_diffPhiPsi1_LamBar_20_50_%i", iSub), Form("c_Cos_diffPhiPsi1_LamBar_20_50_%i", iSub), 0, 1024, 1800, 1024);
+
+        c_Cos_theta_20_50[iSub] = new TCanvas(Form("c_Cos_theta_20_50_%i", iSub), Form("c_Cos_theta_20_50_%i", iSub), 0, 1024, 1800, 1024);
+        c_Cos_theta_LamBar_20_50[iSub] = new TCanvas(Form("c_Cos_theta_LamBar_20_50_%i", iSub), Form("c_Cos_theta_LamBar_20_50_%i", iSub), 0, 1024, 1800, 1024);
+
+        c_Sin_theta_20_50[iSub] = new TCanvas(Form("c_Sin_theta_20_50_%i", iSub), Form("c_Sin_theta_20_50_%i", iSub), 0, 1024, 1800, 1024);
+        c_Sin_theta_LamBar_20_50[iSub] = new TCanvas(Form("c_Sin_theta_LamBar_20_50_%i", iSub), Form("c_Sin_theta_LamBar_20_50_%i", iSub), 0, 1024, 1800, 1024);
+
+        c_Sin_diffPhiPsi1Sin_theta_20_50[iSub] = new TCanvas(Form("c_Sin_diffPhiPsi1Sin_theta_20_50_%i", iSub), Form("c_Sin_diffPhiPsi1Sin_theta_20_50_%i", iSub), 0, 1024, 1800, 1024);
+        c_Sin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub] = new TCanvas(Form("c_Sin_diffPhiPsi1Sin_theta_LamBar_20_50_%i", iSub), Form("c_Sin_diffPhiPsi1Sin_theta_LamBar_20_50_%i", iSub), 0, 1024, 1800, 1024);
+
+        c_Cos_diffPhiPsi1Sin_theta_20_50[iSub] = new TCanvas(Form("c_Cos_diffPhiPsi1Sin_theta_20_50_%i", iSub), Form("c_Cos_diffPhiPsi1Sin_theta_20_50_%i", iSub), 0, 1024, 1800, 1024);
+        c_Cos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub] = new TCanvas(Form("c_Cos_diffPhiPsi1Sin_theta_LamBar_20_50_%i", iSub), Form("c_Cos_diffPhiPsi1Sin_theta_LamBar_20_50_%i", iSub), 0, 1024, 1800, 1024);
         
+        
+        c_lam_20_50[iSub]->Divide(3, 2);
+        c_lamBar_20_50[iSub]->Divide(3, 2);
+
+        c_Sin_diffPhiPsi1_20_50[iSub]->Divide(3, 2);
+        c_Sin_diffPhiPsi1_LamBar_20_50[iSub]->Divide(3, 2);
+
+        c_Cos_diffPhiPsi1_20_50[iSub]->Divide(3, 2);
+        c_Cos_diffPhiPsi1_LamBar_20_50[iSub]->Divide(3, 2);
+
+        c_Cos_theta_20_50[iSub]->Divide(3, 2);
+        c_Cos_theta_LamBar_20_50[iSub]->Divide(3, 2);
+
+        c_Sin_theta_20_50[iSub]->Divide(3, 2);
+        c_Sin_theta_LamBar_20_50[iSub]->Divide(3, 2);
+
+        c_Sin_diffPhiPsi1Sin_theta_20_50[iSub]->Divide(3, 2);
+        c_Sin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->Divide(3, 2);
+
+        c_Cos_diffPhiPsi1Sin_theta_20_50[iSub]->Divide(3, 2);
+        c_Cos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->Divide(3, 2);
     }
     
+    //Fit function init
+    TF1 *FitCosTetaFunc;
+
+    TF1 *FitFuncKFP = new TF1("FitFuncKFP", "gaus(0)+gaus(3) + [6] + [7]*x", 1.1, 1.13);
+    FitFuncKFP->SetParLimits(1, 1.1, 1.13);
+	FitFuncKFP->SetParLimits(2, 0.0005, 0.001);    
+    FitFuncKFP->SetParLimits(4, 1.113, 1.12);
+	FitFuncKFP->SetParLimits(5, 0.001, 0.005);
+
+    //graphs init
     TGraphErrors *grSin_diffPhiPsi1_20_50[2];
     TGraphErrors *grCos_diffPhiPsi1_20_50[2];
     TGraphErrors *grCos_theta_20_50[2];
@@ -366,74 +477,368 @@ void PolarVsDiff_Psin_phi(){
     TGraphErrors *grSin_diffPhiPsi1Sin_theta_LamBar_20_50[2];
     TGraphErrors *grCos_diffPhiPsi1Sin_theta_LamBar_20_50[2];
 
+    //This need to subtract distributions
+    TProfile *prCos_diffPhiPsi1_20_50_aver[2];
+    TProfile *prCos_theta_20_50_aver[2];
+    TProfile *prCos_diffPhiPsi1Sin_theta_20_50_aver[2];
+
+    TProfile *prCos_diffPhiPsi1_LamBar_20_50_aver[2];
+    TProfile *prCos_theta_LamBar_20_50_aver[2];
+    TProfile *prCos_diffPhiPsi1Sin_theta_LamBar_20_50_aver[2];
+
     for(int iSub=0; iSub!=2; iSub++){
-        grSin_diffPhiPsi1_20_50[iSub] = ConvertProfToGraph(prSin_diffPhiPsi1_20_50[iSub]);
-        grCos_diffPhiPsi1_20_50[iSub] = ConvertProfToGraph(prCos_diffPhiPsi1_20_50[iSub]);
-        grCos_theta_20_50[iSub] = ConvertProfToGraph(prCos_theta_20_50[iSub]);
-        grSin_theta_20_50[iSub] = ConvertProfToGraph(prSin_theta_20_50[iSub]);
-        grSin_diffPhiPsi1Sin_theta_20_50[iSub] = ConvertProfToGraph(prSin_diffPhiPsi1Sin_theta_20_50[iSub]);
-        grCos_diffPhiPsi1Sin_theta_20_50[iSub] = ConvertProfToGraph(prCos_diffPhiPsi1Sin_theta_20_50[iSub]);
+        prCos_diffPhiPsi1_20_50_aver[iSub] = (TProfile*)prCos_diffPhiPsi1_20_50[0][iSub]->Clone();
+        prCos_diffPhiPsi1_20_50_aver[iSub]->Reset();
+        prCos_theta_20_50_aver[iSub] = (TProfile*)prCos_theta_20_50[0][iSub]->Clone();
+        prCos_theta_20_50_aver[iSub]->Reset();
+        prCos_diffPhiPsi1Sin_theta_20_50_aver[iSub] = (TProfile*)prCos_diffPhiPsi1Sin_theta_20_50[0][iSub]->Clone();
+        prCos_diffPhiPsi1Sin_theta_20_50_aver[iSub]->Reset();
 
-        grSin_diffPhiPsi1_LamBar_20_50[iSub] = ConvertProfToGraph(prSin_diffPhiPsi1_LamBar_20_50[iSub]);
-        grCos_diffPhiPsi1_LamBar_20_50[iSub] = ConvertProfToGraph(prCos_diffPhiPsi1_LamBar_20_50[iSub]);
-        grCos_theta_LamBar_20_50[iSub] = ConvertProfToGraph(prCos_theta_LamBar_20_50[iSub]);
-        grSin_theta_LamBar_20_50[iSub] = ConvertProfToGraph(prSin_theta_LamBar_20_50[iSub]);
-        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub] = ConvertProfToGraph(prSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]);
-        grCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub] = ConvertProfToGraph(prCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]);
+        prCos_diffPhiPsi1_LamBar_20_50_aver[iSub] = (TProfile*)prCos_diffPhiPsi1_LamBar_20_50[0][iSub]->Clone();
+        prCos_diffPhiPsi1_LamBar_20_50_aver[iSub]->Reset();
+        prCos_theta_LamBar_20_50_aver[iSub] = (TProfile*)prCos_theta_LamBar_20_50[0][iSub]->Clone();
+        prCos_theta_LamBar_20_50_aver[iSub]->Reset();
+        prCos_diffPhiPsi1Sin_theta_LamBar_20_50_aver[iSub] = (TProfile*)prCos_diffPhiPsi1Sin_theta_LamBar_20_50[0][iSub]->Clone();
+        prCos_diffPhiPsi1Sin_theta_LamBar_20_50_aver[iSub]->Reset();
 
-        //Set marker styles
-        grSin_diffPhiPsi1_20_50[iSub]->SetMarkerColor(kRed);
+        for(int iphi=0; iphi!=6; iphi++){
+            //....................Lam invM..................
+            c_lam_20_50[iSub]->cd(iphi+1);
+            InvMLamDist_20_50[iphi][iSub]->GetXaxis()->SetTitle("M_{inv}");
+            InvMLamDist_20_50[iphi][iSub]->GetXaxis()->SetLabelSize(0.06);
+            InvMLamDist_20_50[iphi][iSub]->GetXaxis()->SetTitleSize(0.06);
+            InvMLamDist_20_50[iphi][iSub]->Fit(FitFuncKFP, "R");        
+            InvMLamDist_20_50[iphi][iSub]->Draw();
+
+            FuncGausKFP->SetParameter(0, FitFuncKFP->GetParameter(0));
+            FuncGausKFP->SetParameter(1, FitFuncKFP->GetParameter(1));
+            FuncGausKFP->SetParameter(2, FitFuncKFP->GetParameter(2));
+            FuncGausKFP->SetParameter(3, FitFuncKFP->GetParameter(3));
+            FuncGausKFP->SetParameter(4, FitFuncKFP->GetParameter(4));
+            FuncGausKFP->SetParameter(5, FitFuncKFP->GetParameter(5));
+
+            LineKFP->SetParameter(0, FitFuncKFP->GetParameter(6));
+            LineKFP->SetParameter(1, FitFuncKFP->GetParameter(7));
+            
+            //<Sin(phi-Psi1)>
+            c_Sin_diffPhiPsi1_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prSin_diffPhiPsi1_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prSin_diffPhiPsi1_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            double phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grSin_diffPhiPsi1_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grSin_diffPhiPsi1_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+            //<Cos(phi-Psi1)>
+            prCos_diffPhiPsi1_20_50_aver[iSub]->Add(prCos_diffPhiPsi1_20_50[iphi][iSub]);
+
+            c_Cos_diffPhiPsi1_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prCos_diffPhiPsi1_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prCos_diffPhiPsi1_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grCos_diffPhiPsi1_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grCos_diffPhiPsi1_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+            //<Cos(Theta)>
+            prCos_theta_20_50_aver[iSub]->Add(prCos_diffPhiPsi1_20_50[iphi][iSub]);
+
+            c_Cos_theta_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prCos_theta_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prCos_theta_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grCos_theta_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grCos_theta_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+            //<Sin(Theta)>
+            c_Sin_theta_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prSin_theta_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prSin_theta_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grSin_theta_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grSin_theta_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+            //<Sin(Psi1-phi)Sin(Theta)>
+            c_Sin_diffPhiPsi1Sin_theta_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prSin_diffPhiPsi1Sin_theta_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prSin_diffPhiPsi1Sin_theta_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+            //<Cos(Psi1-phi)Sin(Theta)>
+            prCos_diffPhiPsi1Sin_theta_20_50_aver[iSub]->Add(prCos_diffPhiPsi1Sin_theta_20_50[iphi][iSub]);
+
+            c_Cos_diffPhiPsi1Sin_theta_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prCos_diffPhiPsi1Sin_theta_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prCos_diffPhiPsi1Sin_theta_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grCos_diffPhiPsi1Sin_theta_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grCos_diffPhiPsi1Sin_theta_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+            //....................LamBar invM..................
+            c_lamBar_20_50[iSub]->cd(iphi+1);
+            InvMLamBarDist_20_50[iphi][iSub]->GetXaxis()->SetTitle("M_{inv}");
+            InvMLamBarDist_20_50[iphi][iSub]->GetXaxis()->SetLabelSize(0.06);
+            InvMLamBarDist_20_50[iphi][iSub]->GetXaxis()->SetTitleSize(0.06);
+            InvMLamBarDist_20_50[iphi][iSub]->Fit(FitFuncKFP, "R");        
+            InvMLamBarDist_20_50[iphi][iSub]->Draw();
+
+            FuncGausKFP->SetParameter(0, FitFuncKFP->GetParameter(0));
+            FuncGausKFP->SetParameter(1, FitFuncKFP->GetParameter(1));
+            FuncGausKFP->SetParameter(2, FitFuncKFP->GetParameter(2));
+            FuncGausKFP->SetParameter(3, FitFuncKFP->GetParameter(3));
+            FuncGausKFP->SetParameter(4, FitFuncKFP->GetParameter(4));
+            FuncGausKFP->SetParameter(5, FitFuncKFP->GetParameter(5));
+
+            LineKFP->SetParameter(0, FitFuncKFP->GetParameter(6));
+            LineKFP->SetParameter(1, FitFuncKFP->GetParameter(7));
+            
+            //<Sin(phi-Psi1)>
+            c_Sin_diffPhiPsi1_LamBar_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prSin_diffPhiPsi1_LamBar_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prSin_diffPhiPsi1_LamBar_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+            //<Cos(phi-Psi1)>
+            prCos_diffPhiPsi1_LamBar_20_50_aver[iSub]->Add(prCos_diffPhiPsi1_20_50[iphi][iSub]);
+
+            c_Cos_diffPhiPsi1_LamBar_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prCos_diffPhiPsi1_LamBar_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prCos_diffPhiPsi1_LamBar_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grCos_diffPhiPsi1_LamBar_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grCos_diffPhiPsi1_LamBar_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+            //<Cos(Theta)>
+            prCos_theta_LamBar_20_50_aver[iSub]->Add(prCos_diffPhiPsi1_20_50[iphi][iSub]);
+
+            c_Cos_theta_LamBar_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prCos_theta_LamBar_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prCos_theta_LamBar_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grCos_theta_LamBar_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grCos_theta_LamBar_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+            //<Sin(Theta)>
+            c_Sin_theta_LamBar_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prSin_theta_LamBar_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prSin_theta_LamBar_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grSin_theta_LamBar_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grSin_theta_LamBar_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+            //<Sin(Psi1-phi)Sin(Theta)>
+            c_Sin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prSin_diffPhiPsi1Sin_theta_LamBar_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prSin_diffPhiPsi1Sin_theta_LamBar_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+            //<Cos(Psi1-phi)Sin(Theta)>
+            prCos_diffPhiPsi1Sin_theta_LamBar_20_50_aver[iSub]->Add(prCos_diffPhiPsi1Sin_theta_20_50[iphi][iSub]);
+
+            c_Cos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->cd(iphi+1);        
+
+            FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+            
+            prCos_diffPhiPsi1Sin_theta_LamBar_20_50[iphi][iSub]->Fit(FitCosTetaFunc);
+            prCos_diffPhiPsi1Sin_theta_LamBar_20_50[iphi][iSub]->Draw();
+
+            Pz = FitCosTetaFunc->GetParameter(0);
+            Pz_err = FitCosTetaFunc->GetParError(0);
+
+            phi = TMath::Pi()/12 + iphi*TMath::Pi()/6;
+            grCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetPoint(iphi, phi, Pz);
+            grCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetPointError(iphi, 0., Pz_err);
+
+        }//for(int iphi=0; iphi!=6; iphi++)
+    }//for(int iSub=0; iSub!=2; iSub++)
+
+    //...................................end of Fitting by invM..................................
+
+    //...................................subtracting.............................................
+    
+    TGraphErrors *grCos_diffPhiPsi1_sub_20_50[2];
+    TGraphErrors *grCos_theta_sub_20_50[2];
+    TGraphErrors *grCos_diffPhiPsi1Sin_theta_sub_20_50[2];
+
+    TGraphErrors *grCos_diffPhiPsi1_LamBar_sub_20_50[2];
+    TGraphErrors *grCos_theta_LamBar_sub_20_50[2];
+    TGraphErrors *grCos_diffPhiPsi1Sin_theta_LamBar_sub_20_50[2];
+
+    for(int iSub=0; iSub!=2; iSub++){
+        grCos_diffPhiPsi1_sub_20_50[iSub] = GetCosTetaSub(prCos_diffPhiPsi1_20_50_aver[iSub], grCos_diffPhiPsi1_20_50[iSub]);
+        grCos_theta_sub_20_50[iSub] = GetCosTetaSub(prCos_theta_20_50_aver[iSub], grCos_theta_20_50[iSub]);
+        grCos_diffPhiPsi1Sin_theta_sub_20_50[iSub] = GetCosTetaSub(prCos_diffPhiPsi1Sin_theta_20_50_aver[iSub], grCos_diffPhiPsi1Sin_theta_20_50[iSub]);
+
+        grCos_diffPhiPsi1_LamBar_sub_20_50[iSub] = GetCosTetaSub(prCos_diffPhiPsi1_LamBar_20_50_aver[iSub], grCos_diffPhiPsi1_LamBar_20_50[iSub]);
+        grCos_theta_LamBar_sub_20_50[iSub] = GetCosTetaSub(prCos_theta_LamBar_20_50_aver[iSub], grCos_theta_LamBar_20_50[iSub]);
+        grCos_diffPhiPsi1Sin_theta_LamBar_sub_20_50[iSub] = GetCosTetaSub(prCos_diffPhiPsi1Sin_theta_LamBar_20_50_aver[iSub], grCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]);
+
+        //Set Marker Styles
+        //<Sin(Psi1-phi)>
+        grSin_diffPhiPsi1_20_50[iSub]->SetMarkerSize(3);
+        grSin_diffPhiPsi1_20_50[iSub]->SetLineWidth(2);
         grSin_diffPhiPsi1_20_50[iSub]->SetMarkerStyle(29);
-        grSin_diffPhiPsi1_20_50[iSub]->SetLineColor(kRed);
-        grSin_diffPhiPsi1_20_50[iSub]->Scale(0.85);
+        grSin_diffPhiPsi1_20_50[iSub]->SetMarkerColor(634);
+        grSin_diffPhiPsi1_20_50[iSub]->SetLineColor(634);
 
-        grCos_diffPhiPsi1_20_50[iSub]->SetMarkerColor(kRed);
-        grCos_diffPhiPsi1_20_50[iSub]->SetMarkerStyle(29);
-        grCos_diffPhiPsi1_20_50[iSub]->SetLineColor(kRed);
+        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerSize(3);
+        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetLineWidth(2);
+        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerStyle(30);
+        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerColor(602);
+        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetLineColor(602);
 
-        grCos_theta_20_50[iSub]->SetMarkerColor(kRed);
-        grCos_theta_20_50[iSub]->SetMarkerStyle(29);
-        grCos_theta_20_50[iSub]->SetLineColor(kRed);
+        //<Cos(Psi1-phi)>
+        grCos_diffPhiPsi1_sub_20_50[iSub]->SetMarkerSize(3);
+        grCos_diffPhiPsi1_sub_20_50[iSub]->SetLineWidth(2);
+        grCos_diffPhiPsi1_sub_20_50[iSub]->SetMarkerStyle(29);
+        grCos_diffPhiPsi1_sub_20_50[iSub]->SetMarkerColor(634);
+        grCos_diffPhiPsi1_sub_20_50[iSub]->SetLineColor(634);
 
-        grSin_theta_20_50[iSub]->SetMarkerColor(kRed);
+        grCos_diffPhiPsi1_LamBar_sub_20_50[iSub]->SetMarkerSize(3);
+        grCos_diffPhiPsi1_LamBar_sub_20_50[iSub]->SetLineWidth(2);
+        grCos_diffPhiPsi1_LamBar_sub_20_50[iSub]->SetMarkerStyle(30);
+        grCos_diffPhiPsi1_LamBar_sub_20_50[iSub]->SetMarkerColor(602);
+        grCos_diffPhiPsi1_LamBar_sub_20_50[iSub]->SetLineColor(602);
+
+        //<Cos(Theta)>
+        grCos_theta_sub_20_50[iSub]->SetMarkerSize(3);
+        grCos_theta_sub_20_50[iSub]->SetLineWidth(2);
+        grCos_theta_sub_20_50[iSub]->SetMarkerStyle(29);
+        grCos_theta_sub_20_50[iSub]->SetMarkerColor(634);
+        grCos_theta_sub_20_50[iSub]->SetLineColor(634);
+
+        grCos_theta_LamBar_sub_20_50[iSub]->SetMarkerSize(3);
+        grCos_theta_LamBar_sub_20_50[iSub]->SetLineWidth(2);
+        grCos_theta_LamBar_sub_20_50[iSub]->SetMarkerStyle(30);
+        grCos_theta_LamBar_sub_20_50[iSub]->SetMarkerColor(602);
+        grCos_theta_LamBar_sub_20_50[iSub]->SetLineColor(602);
+        
+        //<Sin(Theta)>
+        grSin_theta_20_50[iSub]->SetMarkerSize(3);
+        grSin_theta_20_50[iSub]->SetLineWidth(2);
         grSin_theta_20_50[iSub]->SetMarkerStyle(29);
-        grSin_theta_20_50[iSub]->SetLineColor(kRed);
+        grSin_theta_20_50[iSub]->SetMarkerColor(634);
+        grSin_theta_20_50[iSub]->SetLineColor(634);
 
-        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerColor(kBlue);
-        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerStyle(30);
-        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetLineColor(kBlue);
-
-        grCos_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerColor(kRed);
-        grCos_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerStyle(29);
-        grCos_diffPhiPsi1Sin_theta_20_50[iSub]->SetLineColor(kRed);
-
-        //LamBar
-        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerColor(kRed);
-        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerStyle(34);
-        grSin_diffPhiPsi1_LamBar_20_50[iSub]->SetLineColor(kRed);
-        grSin_diffPhiPsi1_LamBar_20_50[iSub]->Scale(0.85);
-
-        grCos_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerColor(kBlue);
-        grCos_diffPhiPsi1_LamBar_20_50[iSub]->SetMarkerStyle(30);
-        grCos_diffPhiPsi1_LamBar_20_50[iSub]->SetLineColor(kBlue);
-
-        grCos_theta_LamBar_20_50[iSub]->SetMarkerColor(kBlue);
-        grCos_theta_LamBar_20_50[iSub]->SetMarkerStyle(30);
-        grCos_theta_LamBar_20_50[iSub]->SetLineColor(kBlue);
-
-        grSin_theta_LamBar_20_50[iSub]->SetMarkerColor(kBlue);
+        grSin_theta_LamBar_20_50[iSub]->SetMarkerSize(3);
+        grSin_theta_LamBar_20_50[iSub]->SetLineWidth(2);
         grSin_theta_LamBar_20_50[iSub]->SetMarkerStyle(30);
-        grSin_theta_LamBar_20_50[iSub]->SetLineColor(kBlue);
+        grSin_theta_LamBar_20_50[iSub]->SetMarkerColor(602);
+        grSin_theta_LamBar_20_50[iSub]->SetLineColor(602);
 
-        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetMarkerColor(kBlue);
-        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetMarkerStyle(28);
-        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetLineColor(kBlue);
+        //<Sin(Psi1-phi)Sin(Theta)>
+        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerSize(3);
+        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetLineWidth(2);
+        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerStyle(29);
+        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetMarkerColor(634);
+        grSin_diffPhiPsi1Sin_theta_20_50[iSub]->SetLineColor(634);
 
-        grCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetMarkerColor(kBlue);
-        grCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetMarkerStyle(30);
-        grCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetLineColor(kBlue);
+        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetMarkerSize(3);
+        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetLineWidth(2);
+        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetMarkerStyle(30);
+        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetMarkerColor(602);
+        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->SetLineColor(602);
+
+        //<Cos(Psi1-phi)Sin(Theta)>
+        grCos_diffPhiPsi1Sin_theta_sub_20_50[iSub]->SetMarkerSize(3);
+        grCos_diffPhiPsi1Sin_theta_sub_20_50[iSub]->SetLineWidth(2);
+        grCos_diffPhiPsi1Sin_theta_sub_20_50[iSub]->SetMarkerStyle(29);
+        grCos_diffPhiPsi1Sin_theta_sub_20_50[iSub]->SetMarkerColor(634);
+        grCos_diffPhiPsi1Sin_theta_sub_20_50[iSub]->SetLineColor(634);
+
+        grCos_diffPhiPsi1Sin_theta_LamBar_sub_20_50[iSub]->SetMarkerSize(3);
+        grCos_diffPhiPsi1Sin_theta_LamBar_sub_20_50[iSub]->SetLineWidth(2);
+        grCos_diffPhiPsi1Sin_theta_LamBar_sub_20_50[iSub]->SetMarkerStyle(30);
+        grCos_diffPhiPsi1Sin_theta_LamBar_sub_20_50[iSub]->SetMarkerColor(602);
+        grCos_diffPhiPsi1Sin_theta_LamBar_sub_20_50[iSub]->SetLineColor(602);
+        
+        
     }
 
+    //...................................end of subtracting.............................................
+
+    //...................................Drawing........................................................
     TCanvas *can[12];
 
     for(int i=0; i!=12; i++){
@@ -457,14 +862,6 @@ void PolarVsDiff_Psin_phi(){
         leg[iSub]->SetBorderSize(0);
     }
 
-    TLegend *leg_check = new TLegend();
-
-    leg_check->AddEntry(grSin_diffPhiPsi1_20_50[0], "#Lambda <sin(#phi-#Psi)>", "p");
-    leg_check->AddEntry(grSin_diffPhiPsi1_LamBar_20_50[0], "#bar{#Lambda} <sin(#phi-#Psi)>", "p");
-    leg_check->AddEntry(grSin_diffPhiPsi1Sin_theta_20_50[0], "#Lambda <sin(#phi-#Psi)sin(#theta)", "p");
-    leg_check->AddEntry(grSin_diffPhiPsi1Sin_theta_LamBar_20_50[0], "#bar{#Lambda} <sin(#phi-#Psi)sin(#theta)", "p");
-    leg_check->AddEntry((TObject*)0, "20-50 \% centrality", "");
-    leg_check->SetBorderSize(0);
 
     leg[0]->AddEntry((TObject*)0, "Psi_comb was used", "");
     leg[1]->AddEntry((TObject*)0, "Psi_e/w was used", "");
@@ -480,16 +877,14 @@ void PolarVsDiff_Psin_phi(){
         //
         mgSin_diffPhiPsi1_20_50[iSub]->Add(grSin_diffPhiPsi1_20_50[iSub]);
         mgSin_diffPhiPsi1_20_50[iSub]->Add(grSin_diffPhiPsi1_LamBar_20_50[iSub]);
-        mgSin_diffPhiPsi1_20_50[iSub]->Add(grSin_diffPhiPsi1Sin_theta_20_50[iSub]);
-        mgSin_diffPhiPsi1_20_50[iSub]->Add(grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]);
 
         //
-        mgCos_diffPhiPsi1_20_50[iSub]->Add(grCos_diffPhiPsi1_20_50[iSub]);
-        mgCos_diffPhiPsi1_20_50[iSub]->Add(grCos_diffPhiPsi1_LamBar_20_50[iSub]);
+        mgCos_diffPhiPsi1_20_50[iSub]->Add(grCos_diffPhiPsi1_sub_20_50[iSub]);
+        mgCos_diffPhiPsi1_20_50[iSub]->Add(grCos_diffPhiPsi1_LamBar_sub_20_50[iSub]);
 
         //
-        mgCos_theta_20_50[iSub]->Add(grCos_theta_20_50[iSub]);
-        mgCos_theta_20_50[iSub]->Add(grCos_theta_LamBar_20_50[iSub]);
+        mgCos_theta_20_50[iSub]->Add(grCos_theta_sub_20_50[iSub]);
+        mgCos_theta_20_50[iSub]->Add(grCos_theta_LamBar_sub_20_50[iSub]);
 
         //
         mgSin_theta_20_50[iSub]->Add(grSin_theta_20_50[iSub]);
@@ -500,8 +895,8 @@ void PolarVsDiff_Psin_phi(){
         mgSin_diffPhiPsi1Sin_theta_20_50[iSub]->Add(grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]);
 
         //
-        mgCos_diffPhiPsi1Sin_theta_20_50[iSub]->Add(grCos_diffPhiPsi1Sin_theta_20_50[iSub]);
-        mgCos_diffPhiPsi1Sin_theta_20_50[iSub]->Add(grCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]);
+        mgCos_diffPhiPsi1Sin_theta_20_50[iSub]->Add(grCos_diffPhiPsi1Sin_theta_sub_20_50[iSub]);
+        mgCos_diffPhiPsi1Sin_theta_20_50[iSub]->Add(grCos_diffPhiPsi1Sin_theta_LamBar_sub_20_50[iSub]);
 
         //Set Titles for tgraph
         mgSin_diffPhiPsi1_20_50[iSub]->GetXaxis()->SetTitle("#phi - #Psi_{2}");
@@ -525,7 +920,7 @@ void PolarVsDiff_Psin_phi(){
         //Drawing
         can[iSub]->cd();
         mgSin_diffPhiPsi1_20_50[iSub]->Draw("AP");
-        leg_check->Draw("same");
+        leg[iSub]->Draw("same");
         funcOfZero->Draw("same");
 
         can[iSub+2]->cd();
@@ -579,4 +974,45 @@ TGraphErrors* ConvertProfToGraph(TProfile* prof){
     grout->GetYaxis()->SetLabelSize(0.1);
     
     return grout;
+}
+
+double GetCoef(double x, TF1 *Sig, TF1 *Bg){
+    double coef =0.;
+    coef = Bg->Eval(x)/(Bg->Eval(x) + Sig->Eval(x));
+    return coef;
+}
+
+double MyFitFunc(double *x, double *par){
+    double coef = GetCoef(x[0], FuncGausKFP, LineKFP);
+    double f = (1-coef)*par[0] + coef*(par[1] + par[2]*x[0]);
+    return f;
+}
+
+TGraphErrors* GetCosTetaSub(TProfile* prof, TGraphErrors* graph){
+    TProfile *prof_new = (TProfile*)prof->Clone();
+    TH1 *hist_average = prof_new->Rebin(prof->GetNbinsX());
+    TGraphErrors *graph_cos_sub = new TGraphErrors(6);
+
+    double x, ex, y, ey;
+
+    for(int iBin=0; iBin!=6; iBin++){
+        x = graph->GetPointX(iBin);
+        ex = 0.;
+        y = graph->GetPointY(iBin) - hist_average->GetBinContent(1);
+        ey = sqrt(pow(graph->GetErrorY(iBin), 2) + pow(hist_average->GetBinError(1), 2));
+        
+        graph_cos_sub->SetPoint(iBin, x, y);
+        graph_cos_sub->SetPointError(iBin, ex, ey);
+    }
+
+    graph_cos_sub->SetMarkerColor(1);
+    graph_cos_sub->SetMarkerStyle(20);
+    graph_cos_sub->SetMarkerSize(3);
+    
+    graph_cos_sub->GetXaxis()->SetTitle("#phi - #Psi_{2}");
+    graph_cos_sub->GetYaxis()->SetTitle("<cos(#theta)>");
+    graph_cos_sub->GetXaxis()->SetLabelSize(0.1);
+    graph_cos_sub->GetYaxis()->SetLabelSize(0.1);
+    
+    return graph_cos_sub;
 }

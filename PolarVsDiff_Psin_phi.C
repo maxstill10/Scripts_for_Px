@@ -33,7 +33,7 @@ TF1 *FuncGausKFP = new TF1("FuncGausKFP", "gaus(0)+gaus(3)", 1.1, 1.13);
 TF1 *LineKFP = new TF1("LineKFP", "[0] + [1]*x", 1.1, 1.13);
 
 void PolarVsDiff_Psin_phi(){
-    TFile *input = new TFile("../Files/14p5GeV/output_Polar_14p5.root", "read");
+    TFile *input = new TFile("../Files/14p5GeV/outputPolar_Psi1_2_3Dep_14p5.root", "read");
 
     TH1F *CosOfDiffFlatt_1 = (TH1F*)input->Get("CosOfDiff_1");
 
@@ -60,7 +60,7 @@ void PolarVsDiff_Psin_phi(){
         Res_1VsCent[1]->SetPoint(8-iCen, cent[8-iCen], resFlatt);
         Res_1VsCent[1]->SetPointError(8-iCen, 0., resErr);
         
-    } 
+    }
 
     TF1 *funcOfZero = new TF1("funcOfZero", "[0]", -100, 300);
     funcOfZero->SetParameter(0, 0);
@@ -88,7 +88,7 @@ void PolarVsDiff_Psin_phi(){
     for(int iCent=0; iCent!=9; iCent++){
         for(int iphi=0; iphi!=6; iphi++){
             for(int iSub=0; iSub!=2; iSub++){
-                prSin_diffPhiPsi1[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prSin_diffPhiPsi1_%i_%i%i", iCent, iphi, iSub));
+                prSin_diffPhiPsi1[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prSin_diffPhiPsi1_%i_%i_%i", iCent, iphi, iSub));
                 prCos_diffPhiPsi1[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1_%i_%i_%i", iCent, iphi, iSub));
                 prCos_theta[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_theta_%i_%i_%i", iCent, iphi, iSub));
                 prSin_theta[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prSin_theta_%i_%i_%i", iCent, iphi, iSub));
@@ -109,6 +109,7 @@ void PolarVsDiff_Psin_phi(){
         }
         
     }
+    
 
     TGraphErrors *grSin_diffPhiPsi1[9][2];
     TGraphErrors *grCos_diffPhiPsi1[9][2];
@@ -452,7 +453,7 @@ void PolarVsDiff_Psin_phi(){
         c_Cos_diffPhiPsi1Sin_theta_20_50[iSub]->Divide(3, 2);
         c_Cos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub]->Divide(3, 2);
     }
-    
+
     //Fit function init
     TF1 *FitCosTetaFunc;
 
@@ -477,7 +478,23 @@ void PolarVsDiff_Psin_phi(){
     TGraphErrors *grSin_diffPhiPsi1Sin_theta_LamBar_20_50[2];
     TGraphErrors *grCos_diffPhiPsi1Sin_theta_LamBar_20_50[2];
 
-    //This need to subtract distributions
+    for(int iSub = 0; iSub!=2; iSub++){
+        grSin_diffPhiPsi1_20_50[iSub] = new TGraphErrors(6);
+        grCos_diffPhiPsi1_20_50[iSub] = new TGraphErrors(6);
+        grCos_theta_20_50[iSub] = new TGraphErrors(6);
+        grSin_theta_20_50[iSub] = new TGraphErrors(6);
+        grSin_diffPhiPsi1Sin_theta_20_50[iSub] = new TGraphErrors(6);
+        grCos_diffPhiPsi1Sin_theta_20_50[iSub] = new TGraphErrors(6);
+
+        grSin_diffPhiPsi1_LamBar_20_50[iSub] = new TGraphErrors(6);
+        grCos_diffPhiPsi1_LamBar_20_50[iSub] = new TGraphErrors(6);
+        grCos_theta_LamBar_20_50[iSub] = new TGraphErrors(6);
+        grSin_theta_LamBar_20_50[iSub] = new TGraphErrors(6);
+        grSin_diffPhiPsi1Sin_theta_LamBar_20_50[iSub] = new TGraphErrors(6);
+        grCos_diffPhiPsi1Sin_theta_LamBar_20_50[iSub] = new TGraphErrors(6);
+    }
+
+    //This need to subtract distributionscout<<"1111"<<endl;
     TProfile *prCos_diffPhiPsi1_20_50_aver[2];
     TProfile *prCos_theta_20_50_aver[2];
     TProfile *prCos_diffPhiPsi1Sin_theta_20_50_aver[2];
@@ -501,6 +518,7 @@ void PolarVsDiff_Psin_phi(){
         prCos_diffPhiPsi1Sin_theta_LamBar_20_50_aver[iSub] = (TProfile*)prCos_diffPhiPsi1Sin_theta_LamBar_20_50[0][iSub]->Clone();
         prCos_diffPhiPsi1Sin_theta_LamBar_20_50_aver[iSub]->Reset();
 
+        
         for(int iphi=0; iphi!=6; iphi++){
             //....................Lam invM..................
             c_lam_20_50[iSub]->cd(iphi+1);
@@ -521,7 +539,7 @@ void PolarVsDiff_Psin_phi(){
             LineKFP->SetParameter(1, FitFuncKFP->GetParameter(7));
             
             //<Sin(phi-Psi1)>
-            c_Sin_diffPhiPsi1_20_50[iSub]->cd(iphi+1);        
+            c_Sin_diffPhiPsi1_20_50[iSub]->cd(iphi+1);
 
             FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
             
@@ -856,8 +874,8 @@ void PolarVsDiff_Psin_phi(){
     for(int iSub=0; iSub!=2; iSub++){
         leg[iSub] = new TLegend();
 
-        leg[iSub]->AddEntry(grCos_theta_20_50[0], "#Lambda", "p");
-        leg[iSub]->AddEntry(grCos_theta_LamBar_20_50[0], "#bar{#Lambda}", "p");
+        leg[iSub]->AddEntry(grSin_diffPhiPsi1_20_50[0], "#Lambda", "p");
+        leg[iSub]->AddEntry(grSin_diffPhiPsi1_LamBar_20_50[0], "#bar{#Lambda}", "p");
         leg[iSub]->AddEntry((TObject*)0, "20-50 \% centrality", "");
         leg[iSub]->SetBorderSize(0);
     }

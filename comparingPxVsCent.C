@@ -100,9 +100,9 @@ void comparingPxVsCent(){
 
     PxVsCent_First_Third->GetXaxis()->SetTitle("centrality %");
     PxVsCent_First_Third->GetYaxis()->SetTitle("<P_{x}sin(n(#phi - #Psi_{n}))> %");
-    PxVsCent_First_Third->GetXaxis()->SetLimits(0, 60);
-    PxVsCent_First_Third->SetMinimum(-1.4);
-    PxVsCent_First_Third->SetMaximum(1.4);
+    PxVsCent_First_Third->GetXaxis()->SetLimits(0, 65);
+    PxVsCent_First_Third->SetMinimum(-1.5);
+    PxVsCent_First_Third->SetMaximum(1.5);
 
     TLegend *leg_first_Third = new TLegend();
 

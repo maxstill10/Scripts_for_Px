@@ -169,16 +169,7 @@ void PzVsDiff_Psi_phi(){
         }
     }
 
-    TCanvas *c_check = new TCanvas("c_check", "", 0, 1024, 1200, 1024);
-
-    c_check->Divide(3, 2);
-
-    for(int iphi=0; iphi!=6; iphi++){
-        c_check->cd(iphi+1);
-        prCos_theta_20_50[iphi][3]->Draw("E");
-    }
-
-
+    
     for(int iSub=0; iSub!=nOrd; iSub++){
         for(int iphi=0; iphi!=6; iphi++){
             //....................Lam invM..................
@@ -353,10 +344,10 @@ void PzVsDiff_Psi_phi(){
 
 
         mgCos_theta_20_50[iSub]->GetXaxis()->SetTitle("#phi - #Psi_{2}");
-        mgCos_theta_20_50[iSub]->GetYaxis()->SetTitle("<cos(#phi_{#Lambda}-#Psi_{1})>");
+        mgCos_theta_20_50[iSub]->GetYaxis()->SetTitle("<cos(#theta)>");
 
-        mgCos_theta_20_50[iSub]->SetMinimum(-0.003);
-        mgCos_theta_20_50[iSub]->SetMaximum(0.003);
+        mgCos_theta_20_50[iSub]->SetMinimum(-0.0015);
+        mgCos_theta_20_50[iSub]->SetMaximum(0.0015);
         mgCos_theta_20_50[iSub]->GetXaxis()->SetLimits(0, 3.15);
 
         can[iSub]->cd();
@@ -366,12 +357,12 @@ void PzVsDiff_Psi_phi(){
         FuncOfFourier_Bar[iSub]->Draw("same");
         leg[iSub]->Draw("same");
         if(iSub == 1){
-            t.DrawText(1.5, 0.0015, "Centrality 20 - 50%");
-            t.DrawText(1.5, 0.0012, "Psi_comb was used");
+            t.DrawText(1.5, 0.0013, "Centrality 20 - 50%");
+            t.DrawText(1.5, 0.0011, "Psi_comb was used");
         }
         if(iSub == 0){
             t.DrawText(1.5, 0.0013, "Centrality 20 - 50%");
-            t.DrawText(1.5, 0.001, "Psi_e/w was used");
+            t.DrawText(1.5, 0.0011, "Psi_e/w was used");
         }
 
         can_tog->cd(iSub+1);
@@ -383,14 +374,14 @@ void PzVsDiff_Psi_phi(){
         if(iSub == 1){
             gPad->SetLeftMargin(0);
             gPad->SetRightMargin(0.2);
-            t.DrawText(1.5, 0.0015, "Centrality 20 - 50%");
-            t.DrawText(1.5, 0.0012, "Psi_comb was used");
+            t.DrawText(1.5, 0.0013, "Centrality 20 - 50%");
+            t.DrawText(1.5, 0.0011, "Psi_comb was used");
         }
         if(iSub == 0){
             gPad->SetRightMargin(0);
             gPad->SetLeftMargin(0.2);
-            t.DrawText(1.5, 0.0015, "Centrality 20 - 50%");
-            t.DrawText(1.5, 0.0012, "Psi_e/w was used");
+            t.DrawText(1.5, 0.0013, "Centrality 20 - 50%");
+            t.DrawText(1.5, 0.0011, "Psi_e/w was used");
         }
     }
     
@@ -405,12 +396,12 @@ void PzVsDiff_Psi_phi(){
     fitFuncOfCos_Psi3->SetParLimits(1, -1, 1);
     fitFuncOfCos_Psi3->FixParameter(2, 0);
 
-    TF1 *FuncOfFourier_Psi3[2];
-    TF1 *FuncOfFourier_Bar_Psi3[2];
-    TFitResultPtr r_Psi3[2];
-    TFitResultPtr r_bar_Psi3[2];
+    TF1 *FuncOfFourier_Psi3[1];
+    TF1 *FuncOfFourier_Bar_Psi3[1];
+    TFitResultPtr r_Psi3[1];
+    TFitResultPtr r_bar_Psi3[1];
     
-    for(int iSub=0; iSub!=2; iSub++){
+    for(int iSub=0; iSub!=1; iSub++){
         grCos_thetaVsdphi_20_50[2+iSub]->Fit("fitFuncOfCos_Psi3");
         FuncOfFourier_Psi3[iSub] = new TF1(Form("FuncOfFourier_%i", iSub), "[0] + 2*[1]*sin(3*x) + 2*[2]*cos(3*x)", 0, 2*TMath::Pi()/3.);
         FuncOfFourier_Psi3[iSub]->SetParameter(0, fitFuncOfCos_Psi3->GetParameter(0));
@@ -467,32 +458,32 @@ void PzVsDiff_Psi_phi(){
 
 
         mgCos_theta_20_50_Psi3[iSub]->GetXaxis()->SetTitle("#phi - #Psi_{3}");
-        mgCos_theta_20_50_Psi3[iSub]->GetYaxis()->SetTitle("<cos(#phi_{#Lambda}-#Psi_{1})>");
+        mgCos_theta_20_50_Psi3[iSub]->GetYaxis()->SetTitle("<cos(#theta)>");
 
-        mgCos_theta_20_50_Psi3[iSub]->SetMinimum(-0.003);
-        mgCos_theta_20_50_Psi3[iSub]->SetMaximum(0.003);
+        //mgCos_theta_20_50_Psi3[iSub]->SetMinimum(-0.003);
+        //mgCos_theta_20_50_Psi3[iSub]->SetMaximum(0.003);
         mgCos_theta_20_50_Psi3[iSub]->GetXaxis()->SetLimits(0, 2.1);
 
         can_Psi3[iSub]->cd();
         mgCos_theta_20_50_Psi3[iSub]->Draw("AP");
         funcOfZero->Draw("same");
-        FuncOfFourier_Psi3[iSub]->Draw("same");
-        FuncOfFourier_Bar_Psi3[iSub]->Draw("same");
+        if(iSub==0) FuncOfFourier_Psi3[iSub]->Draw("same");
+        if(iSub==0) FuncOfFourier_Bar_Psi3[iSub]->Draw("same");
         leg_Psi3[iSub]->Draw("same");
         if(iSub == 1){
             t.DrawText(1, 0.0025, "Centrality 20 - 50%");
             t.DrawText(1, 0.002, "Psi_comb was used");
         }
         if(iSub == 0){
-            t.DrawText(1, 0.0025, "Centrality 20 - 50%");
-            t.DrawText(1, 0.002, "Psi_e/w was used");
+            t.DrawText(0.9, 0.0013, "Centrality 20 - 50%");
+            t.DrawText(0.9, 0.0011, "Psi_e/w was used");
         }
 
         can_tog_Psi3->cd(iSub+1);
         mgCos_theta_20_50_Psi3[iSub]->Draw("AP");
         funcOfZero->Draw("same");
-        FuncOfFourier_Psi3[iSub]->Draw("same");
-        FuncOfFourier_Bar_Psi3[iSub]->Draw("same");
+        if(iSub==0) FuncOfFourier_Psi3[iSub]->Draw("same");
+        if(iSub==0) FuncOfFourier_Bar_Psi3[iSub]->Draw("same");
         leg_Psi3[iSub]->Draw("same");
         if(iSub == 1){
             gPad->SetLeftMargin(0);
@@ -508,37 +499,40 @@ void PzVsDiff_Psi_phi(){
         }
     }
 
+    mgCos_theta_20_50_Psi3[0]->SetMinimum(-0.0015);
+    mgCos_theta_20_50_Psi3[0]->SetMaximum(0.0015);
+
     TCanvas *can_psi2_psi3 = new TCanvas("can_psi2_psi3", "", 0, 1024, 1800, 900);
     can_psi2_psi3->Divide(2, 1, 0.0, 0.0);
     
     //
     can_psi2_psi3->cd(1);
 
-    mgCos_theta_20_50[1]->Draw("AP");
+    mgCos_theta_20_50[0]->Draw("AP");
 
     funcOfZero->Draw("same");
-    FuncOfFourier[1]->Draw("same");
-    FuncOfFourier_Bar[1]->Draw("same");
-    leg[1]->Draw("same");
+    FuncOfFourier[0]->Draw("same");
+    FuncOfFourier_Bar[0]->Draw("same");
+    leg[0]->Draw("same");
 
     gPad->SetRightMargin(0);
     gPad->SetLeftMargin(0.2);
-    t.DrawText(1.5, 0.0025, "Centrality 20 - 50%");
-    t.DrawText(1.5, 0.002, "Psi_comb was used");
+    t.DrawText(1.5, 0.0013, "Centrality 20 - 50%");
+    t.DrawText(1.5, 0.0011, "Psi_ew was used");
 
     //
     can_psi2_psi3->cd(2);
 
-    mgCos_theta_20_50_Psi3[1]->Draw("AP");
+    mgCos_theta_20_50_Psi3[0]->Draw("AP");
     funcOfZero->Draw("same");
-    FuncOfFourier_Psi3[1]->Draw("same");
-    FuncOfFourier_Bar_Psi3[1]->Draw("same");
-    leg_Psi3[1]->Draw("same");
+    FuncOfFourier_Psi3[0]->Draw("same");
+    FuncOfFourier_Bar_Psi3[0]->Draw("same");
+    leg_Psi3[0]->Draw("same");
 
     gPad->SetLeftMargin(0);
     gPad->SetRightMargin(0.2);
-    t.DrawText(1, 0.0025, "Centrality 20 - 50%");
-    t.DrawText(1, 0.002, "Psi_comb was used");
+    t.DrawText(0.9, 0.0013, "Centrality 20 - 50%");
+    t.DrawText(0.9, 0.0011, "Psi_ew was used");
 
 }
 

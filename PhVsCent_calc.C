@@ -29,7 +29,7 @@ const Double_t alpha_LamBar = -0.732;
 
 //true, if <cos(Psi_1-phi)sin(theta)> calculated
 //false, if <cos(Psi_1-phi)> calculated
-const bool sinUsage = true;
+const bool sinUsage = false;
 
 TGraphErrors* ConvertProfToGraph(TProfile* prof);
 TGraphErrors* GetCosTetaSub(TProfile* prof);
@@ -166,20 +166,20 @@ void PhVsCent_calc(){
 
     TF1 *FitCosTetaFunc;
 
-    TCanvas *canv = new TCanvas("canv", "canv #Lambda", 0, 1024, 1800, 1024);
-    TCanvas *canv1 = new TCanvas("canv1", "canv1 #Lambda", 0, 1024, 1800, 1024);
-    TCanvas *canv2 = new TCanvas("canv2", "canv2 #Lambda", 0, 1024, 1800, 1024);
-    TCanvas *canv3 = new TCanvas("canv3", "canv3 #Lambda", 0, 1024, 1800, 1024);
+    TCanvas *canv_0 = new TCanvas("canv_0", "canv #Lambda", 0, 1024, 1800, 1024);
+    TCanvas *canv_1 = new TCanvas("canv_1", "canv1 #Lambda", 0, 1024, 1800, 1024);
+    TCanvas *canv_2 = new TCanvas("canv_2", "canv2 #Lambda", 0, 1024, 1800, 1024);
+    TCanvas *canv_3 = new TCanvas("canv_3", "canv3 #Lambda", 0, 1024, 1800, 1024);
 
-    canv->Divide(3,3);
-    canv1->Divide(3,3);
-    canv2->Divide(3,3);
-    canv3->Divide(3,3);
+    canv_0->Divide(3,3);
+    canv_1->Divide(3,3);
+    canv_2->Divide(3,3);
+    canv_3->Divide(3,3);
 
     
     for(int iCent = 0; iCent!=9; iCent++){    
         
-        canv->cd(9-iCent);
+        canv_0->cd(9-iCent);
         
         InvMLamDist_aver[iCent]->GetXaxis()->SetTitle("M_{inv}");
         InvMLamDist_aver[iCent]->GetXaxis()->SetLabelSize(0.06);
@@ -198,13 +198,16 @@ void PhVsCent_calc(){
         LineKFP->SetParameter(0, FitFuncKFP->GetParameter(6));
         LineKFP->SetParameter(1, FitFuncKFP->GetParameter(7));
 
-        canv1->cd(9-iCent);
+        
         
 
         FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
 
+        canv_1->cd(9-iCent);
+
         //FitCosTetaFunc->FixParameter(1, 0.);
         //FitCosTetaFunc->FixParameter(2, 0.);
+        
         
         prSin_diffPhiPsi1_aver[iCent]->SetTitle(Form("#Lambda centrality, %i-%i", cent_lim[8-iCent], cent_lim[9-iCent]));
         prSin_diffPhiPsi1_aver[iCent]->Fit(FitCosTetaFunc);
@@ -217,7 +220,7 @@ void PhVsCent_calc(){
         PhVsCent_Lam->SetPointError(8-iCent, 0, Ph_err);
         
         //AntiLambda
-        canv2->cd(9-iCent);
+        canv_2->cd(9-iCent);
         
         InvMLamBarDist_aver[iCent]->GetXaxis()->SetTitle("M_{inv}");
         InvMLamBarDist_aver[iCent]->GetXaxis()->SetLabelSize(0.05);
@@ -236,10 +239,12 @@ void PhVsCent_calc(){
         LineKFP->SetParameter(0, FitFuncKFP->GetParameter(6));
         LineKFP->SetParameter(1, FitFuncKFP->GetParameter(7));
 
-        canv3->cd(9-iCent);
+        
         
 
         FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
+
+        canv_3->cd(9-iCent);
 
         //FitCosTetaFunc->FixParameter(1, 0.);
         //FitCosTetaFunc->FixParameter(2, 0.);

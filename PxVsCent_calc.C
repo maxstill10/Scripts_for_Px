@@ -35,7 +35,7 @@ const bool sinUsage = false;
 const bool mfitDr = false;
 
 //order of EP
-const int nOrd = 2;
+const int nOrd = 3;
 
 TGraphErrors* ConvertProfToGraph(TProfile* prof);
 TGraphErrors* GetCosTetaSub(TProfile* prof);
@@ -458,8 +458,8 @@ void PxVsCent_calc(){
 
     //Res factor correction
     for(int iSub=0; iSub!=2; iSub++){
-        PxVsCent_Lam[iSub] = ResFactCorr(PxVsCent_Lam[iSub], Res_1VsCent[iSub]);
-        PxVsCent_LamBar[iSub] = ResFactCorr(PxVsCent_LamBar[iSub], Res_1VsCent[iSub]);
+        PxVsCent_Lam[iSub] = ResFactCorr(PxVsCent_Lam[iSub], Res_1VsCent[1]);
+        PxVsCent_LamBar[iSub] = ResFactCorr(PxVsCent_LamBar[iSub], Res_1VsCent[1]);
 
         if(nOrd == 2)
         {
@@ -496,6 +496,9 @@ void PxVsCent_calc(){
     TGraphErrors *PxVsCent_Tog[2];
     
     for(int iSub=0; iSub!=2; iSub++){
+
+        PxVsCent_Lam[iSub]=MakeAverageBin(PxVsCent_Lam[iSub], 7, 8);
+        PxVsCent_LamBar[iSub]=MakeAverageBin(PxVsCent_LamBar[iSub], 7, 8);
 
         //Lam+LamBar
         PxVsCent_Tog[iSub] = MakeAverage(PxVsCent_Lam[iSub], PxVsCent_LamBar[iSub]);
@@ -569,8 +572,8 @@ void PxVsCent_calc(){
         c_px_full->cd(iSub+1);
         if(iSub==0) {gPad->SetRightMargin(0); gPad->SetLeftMargin(0.2); }
         if(iSub==1) {gPad->SetLeftMargin(0); gPad->SetRightMargin(0.2);}
-        mgPxVsCent[iSub]->SetMaximum(2);
-        mgPxVsCent[iSub]->SetMinimum(-2);
+        mgPxVsCent[iSub]->SetMaximum(4);
+        mgPxVsCent[iSub]->SetMinimum(-4);
         mgPxVsCent[iSub]->Draw("AP");
         funcOfZero->Draw("same");
         leg_px[iSub]->Draw("same");
@@ -586,7 +589,7 @@ void PxVsCent_calc(){
 
     
     for(int iCent=0; iCent!=PxVsCent_Tog[0]->GetN(); iCent++){
-        PxVsCent_Tog[1]->SetPointX(iCent, cent[iCent] + 0.5);
+        PxVsCent_Tog[1]->SetPointX(iCent, PxVsCent_Tog[0]->GetPointX(iCent) + 0.5);
     }
 
     PxVsCent_Tog[0]->SetMarkerStyle(34);
@@ -602,8 +605,8 @@ void PxVsCent_calc(){
 
     mgPxVsCent_Tog->GetXaxis()->SetTitle("centrality %");
     mgPxVsCent_Tog->GetYaxis()->SetTitle(Form("<P_{x}sin(2#phi - 2#Psi_{%i})> %%", nOrd));
-    mgPxVsCent_Tog->SetMinimum(-1.4);
-    mgPxVsCent_Tog->SetMaximum(1.4);
+    mgPxVsCent_Tog->SetMinimum(-2);
+    mgPxVsCent_Tog->SetMaximum(2);
     mgPxVsCent_Tog->Draw("AP");
     funcOfZero->Draw("same");
 

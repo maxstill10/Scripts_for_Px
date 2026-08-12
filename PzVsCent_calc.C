@@ -29,7 +29,7 @@ const Double_t alpha_LamBar = -0.732;
 
 
 //on/off fit drawing
-const bool mfitDr = true;
+const bool mfitDr = false;
 
 //order of EP
 const int nOrd = 3;
@@ -533,7 +533,7 @@ void PzVsCent_calc(){
         mgPzVsCent[iSub]->Add(PzVsCent_LamBar[iSub]);
 
         mgPzVsCent[iSub]->GetXaxis()->SetTitle("centrality %");
-        mgPzVsCent[iSub]->GetYaxis()->SetTitle(Form("<P_{x}sin(2#phi - 2#Psi_{%i})> %%", nOrd));
+        mgPzVsCent[iSub]->GetYaxis()->SetTitle(Form("<P_{z}sin(%i(#phi - #Psi_{%i}))> %%", nOrd, nOrd));
         mgPzVsCent[iSub]->Draw("AP");
         funcOfZero->Draw("same");
 
@@ -549,8 +549,8 @@ void PzVsCent_calc(){
         c_Pz_full->cd(iSub+1);
         if(iSub==0) {gPad->SetRightMargin(0); gPad->SetLeftMargin(0.2); }
         if(iSub==1) {gPad->SetLeftMargin(0); gPad->SetRightMargin(0.2);}
-        mgPzVsCent[iSub]->SetMaximum(3.5);
-        mgPzVsCent[iSub]->SetMinimum(-9);
+        //mgPzVsCent[iSub]->SetMaximum(1);
+        //mgPzVsCent[iSub]->SetMinimum(-1.5);
         mgPzVsCent[iSub]->Draw("AP");
         funcOfZero->Draw("same");
         leg_Pz[iSub]->Draw("same");
@@ -581,9 +581,9 @@ void PzVsCent_calc(){
     mgPzVsCent_Tog->Add(PzVsCent_Tog[1]);
 
     mgPzVsCent_Tog->GetXaxis()->SetTitle("centrality %");
-    mgPzVsCent_Tog->GetYaxis()->SetTitle(Form("<P_{x}sin(2#phi - 2#Psi_{%i})> %%", nOrd));
-    mgPzVsCent_Tog->SetMinimum(-3);
-    mgPzVsCent_Tog->SetMaximum(3);
+    mgPzVsCent_Tog->GetYaxis()->SetTitle(Form("<P_{z}sin(%i(#phi - #Psi_{%i}))> %%", nOrd, nOrd));
+    //mgPzVsCent_Tog->SetMinimum(-1);
+    //mgPzVsCent_Tog->SetMaximum(1);
     mgPzVsCent_Tog->Draw("AP");
     funcOfZero->Draw("same");
 

@@ -34,15 +34,15 @@ void comparingPxVsCent(){
 
     PxVsCentFirst->SetMarkerSize(3);
     PxVsCentFirst->SetLineWidth(2);
-    PxVsCentFirst->SetMarkerStyle(29);
-    PxVsCentFirst->SetMarkerColor(634);
-    PxVsCentFirst->SetLineColor(634);
+    PxVsCentFirst->SetMarkerStyle(34);
+    PxVsCentFirst->SetMarkerColor(1);
+    PxVsCentFirst->SetLineColor(1);
 
     PxVsCentSecond->SetMarkerSize(3);
     PxVsCentSecond->SetLineWidth(2);
-    PxVsCentSecond->SetMarkerStyle(30);
-    PxVsCentSecond->SetMarkerColor(602);
-    PxVsCentSecond->SetLineColor(602);
+    PxVsCentSecond->SetMarkerStyle(75);
+    PxVsCentSecond->SetMarkerColor(804);
+    PxVsCentSecond->SetLineColor(804);
 
     for(int iCent = 0; iCent!=PxVsCentSecond->GetN(); iCent++){
         double x = PxVsCentSecond->GetPointX(iCent);

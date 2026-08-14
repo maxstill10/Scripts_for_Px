@@ -235,7 +235,7 @@ void PzVsCent_calc(){
     double Pz, Pz_err;
     TF1 *FitFuncKFP = new TF1("FitFuncKFP", "gaus(0)+gaus(3) + [6] + [7]*x", 1.1, 1.13);
     FitFuncKFP->SetParLimits(1, 1.114, 1.117);
-	FitFuncKFP->SetParLimits(2, 0.0005, 0.001);    
+	FitFuncKFP->SetParLimits(2, 0.0005, 0.0011);    
     FitFuncKFP->SetParLimits(4, 1.114, 1.117);
 	FitFuncKFP->SetParLimits(5, 0.0015, 0.005);
 
@@ -365,6 +365,10 @@ void PzVsCent_calc(){
 
     //...................................end of Fitting by invM..................................
 
+    if(!mfitDr){
+        gROOT->SetBatch(kFALSE);
+    }
+
     //...................................Fitting by phi............................................
 
     TGraphErrors *PzVsCent_Lam[2];
@@ -385,17 +389,17 @@ void PzVsCent_calc(){
     c[2]->SetTitle("LambdaBar, Psi_e/w");
     c[3]->SetTitle("LambdaBar, Psi_comb");
 
-    //TGaxis::SetMaxDigits(1);
-    gStyle->SetOptFit(0001);
+    TGaxis::SetMaxDigits(1);
+    //gStyle->SetOptFit(0001);
 
 
     int cent_lim[10] = {0, 5, 10, 20, 30, 40, 50, 60, 70, 80};
 
     TF1 *fitFuncOfCos = new TF1("fitFuncOfCos", Form("[0] + 2*[1]*sin(%i*x) + 2*[2]*cos(%i*x)", nOrd, nOrd), 0, 2*TMath::Pi()/nOrd);
 
-    fitFuncOfCos->FixParameter(0, 0);
+    //fitFuncOfCos->FixParameter(0, 0);
     fitFuncOfCos->SetParLimits(1, -1, 1);
-    fitFuncOfCos->FixParameter(2, 0);
+    //fitFuncOfCos->FixParameter(2, 0);
 
     
     for(int iCent=0; iCent!=9; iCent++){
@@ -404,6 +408,11 @@ void PzVsCent_calc(){
             //Set Y titles
             grCos_thetaVsdphi[iCent][iSub]->GetYaxis()->SetTitle("<cos(#phi_{#Lambda}-#Psi_{1})>");
             grCos_theta_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitle("<cos(#phi_{#bar{#Lambda}}-#Psi_{1})>");
+
+            if(iSub == 0){grCos_thetaVsdphi[iCent][iSub]->SetMinimum(-0.002); grCos_thetaVsdphi[iCent][iSub]->SetMaximum(0.003);}
+            if(iSub == 1){grCos_thetaVsdphi[iCent][iSub]->SetMinimum(-0.006); grCos_thetaVsdphi[iCent][iSub]->SetMaximum(0.006);}
+            if(iSub == 0){grCos_theta_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.003); grCos_theta_LamBarVsdphi[iCent][iSub]->SetMaximum(0.005);}
+            if(iSub == 1){grCos_theta_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.008); grCos_theta_LamBarVsdphi[iCent][iSub]->SetMaximum(0.008);}
 
             //Set graph titles
             grCos_thetaVsdphi[iCent][iSub]->SetTitle(Form("#Lambda centrality, %i-%i", cent_lim[8-iCent], cent_lim[9-iCent]));
@@ -416,8 +425,9 @@ void PzVsCent_calc(){
             if(iCent == 2 || iCent == 5 || iCent == 8){
                 gPad->SetLeftMargin(0.25);
                 gPad->SetRightMargin(0.02);
-                grCos_thetaVsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grCos_thetaVsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(1);
                 grCos_thetaVsdphi[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+                grCos_thetaVsdphi[iCent][iSub]->GetYaxis()->SetLabelSize(0.1);
             }
             grCos_thetaVsdphi[iCent][iSub]->Fit("fitFuncOfCos");
             grCos_thetaVsdphi[iCent][iSub]->Draw("AP");
@@ -432,8 +442,9 @@ void PzVsCent_calc(){
             if(iCent == 2 || iCent == 5 || iCent == 8){
                 gPad->SetLeftMargin(0.25);
                 gPad->SetRightMargin(0.02);
-                grCos_theta_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(0.7);
+                grCos_theta_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(1);
                 grCos_theta_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+                grCos_theta_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetLabelSize(0.1);
             }
             grCos_theta_LamBarVsdphi[iCent][iSub]->Draw("AP");
             grCos_theta_LamBarVsdphi[iCent][iSub]->Fit("fitFuncOfCos");
@@ -499,11 +510,7 @@ void PzVsCent_calc(){
         PzVsCent_Tog[iSub]->Write();
     }
     
-    output->Close();
-
-    if(!mfitDr){
-        gROOT->SetBatch(kFALSE);
-    }
+    output->Close();  
 
     
     //Drawing Pz Vs Centrality

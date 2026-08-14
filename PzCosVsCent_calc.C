@@ -27,15 +27,11 @@
 const Double_t alpha_Lam = 0.732;
 const Double_t alpha_LamBar = -0.732;
 
-//true, if <cos(Psi_1-phi)sin(theta)> calculated
-//false, if <cos(Psi_1-phi)> calculated
-const bool sinUsage = false;
 
 //on/off fit drawing
 const bool mfitDr = false;
 
 //order of EP
-//const int nOrd = 2;
 const int nOrd = 3;
 
 TGraphErrors* ConvertProfToGraph(TProfile* prof);
@@ -53,12 +49,11 @@ double MyFitFunc(double *x, double *par);
 TF1 *FuncGausKFP = new TF1("FuncGausKFP", "gaus(0)+gaus(3)", 1.1, 1.13);
 TF1 *LineKFP = new TF1("LineKFP", "[0] + [1]*x", 1.1, 1.13);
 
-void PxVsCent_calc(){
+void PzCosVsCent_calc(){
     TFile *input = new TFile("../Files/14p5GeV/outputPolar_Psi1_2_3Dep_14p5.root", "read");
-    TFile *output;
+    //TFile *output;
 
-    if(sinUsage) output = TFile::Open(Form("../output/output_PxVsCent_forPsi%i_SinInclude_14p5.root", nOrd), "recreate");
-    if(!sinUsage) output = TFile::Open(Form("../output/output_PxVsCent_forPsi%i_ConstSine_14p5.root", nOrd), "recreate");
+    //output = TFile::Open(Form("../output/output_PzVsCent_forPsi%i_14p5.root", nOrd), "recreate");
 
     TH1F *CosOfDiffFlatt_1 = (TH1F*)input->Get("CosOfDiff_1");
     TH1F *CosOfDiffFlatt_2 = (TH1F*)input->Get("CosOfDiff_2");
@@ -179,9 +174,9 @@ void PxVsCent_calc(){
     funcOfZero->SetLineWidth(2);
 
 
-    //..................................Px calculation starts here.................................
-    TProfile *prCos_diffPhiPsi1[9][6][2];
-    TProfile *prCos_diffPhiPsi1_LamBar[9][6][2];
+    //..................................Pz calculation starts here.................................
+    TProfile *prCos_theta[9][6][2];
+    TProfile *prCos_theta_LamBar[9][6][2];
 
     TH1F *InvMLamDist[9][6][2];
     TH1F *InvMLamBarDist[9][6][2];
@@ -189,15 +184,10 @@ void PxVsCent_calc(){
     for(int iCent=0; iCent!=9; iCent++){
         for(int iphi=0; iphi!=6; iphi++){
             for(int iSub=0; iSub!=2; iSub++){
-                if(sinUsage){
-                    prCos_diffPhiPsi1[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1Sin_theta_%i_%i_%i", iCent, iphi, iSub + (nOrd-2)*2));
-                    prCos_diffPhiPsi1_LamBar[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1Sin_theta_LamBar_%i_%i_%i", iCent, iphi, iSub + (nOrd-2)*2));
-                }
                 
-                if(!sinUsage){
-                    prCos_diffPhiPsi1[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1_%i_%i_%i", iCent, iphi, iSub + (nOrd-2)*2));
-                    prCos_diffPhiPsi1_LamBar[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_diffPhiPsi1_LamBar_%i_%i_%i", iCent, iphi, iSub + (nOrd-2)*2));
-                }
+                prCos_theta[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_theta_%i_%i_%i", iCent, iphi, iSub + (nOrd-2)*2));
+                prCos_theta_LamBar[iCent][iphi][iSub] = (TProfile*)input->Get(Form("prCos_theta_LamBar_%i_%i_%i", iCent, iphi, iSub + (nOrd-2)*2));
+                
 
                 //lam invM dist
                 InvMLamDist[iCent][iphi][iSub] = (TH1F*)input->Get(Form("InvMLamDist_%i_%i_%i", iCent, iphi, iSub));
@@ -207,32 +197,32 @@ void PxVsCent_calc(){
     }
 
     //...................................Fitting by invM..................................
-    TGraphErrors *grCos_diffPhiPsi1Vsdphi[9][2];
-    TGraphErrors *grCos_diffPhiPsi1_LamBarVsdphi[9][2];
+    TGraphErrors *grCos_thetaVsdphi[9][2];
+    TGraphErrors *grCos_theta_LamBarVsdphi[9][2];
 
     for(int iCent = 0; iCent!=9; iCent++){
         for(int iSub = 0; iSub!=2; iSub++){           
-            grCos_diffPhiPsi1Vsdphi[iCent][iSub] = new TGraphErrors(6);
-            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub] = new TGraphErrors(6);
+            grCos_thetaVsdphi[iCent][iSub] = new TGraphErrors(6);
+            grCos_theta_LamBarVsdphi[iCent][iSub] = new TGraphErrors(6);
         }
     }
 
-    TGraphErrors *grCos_diffPhiPsi1_Sub[9][6][2];
-    TGraphErrors *grCos_diffPhiPsi1_LamBar_Sub[9][6][2];
+    TGraphErrors *grCos_theta_Sub[9][6][2];
+    TGraphErrors *grCos_theta_LamBar_Sub[9][6][2];
 
-    TProfile *prCos_diffPhiPsi1_aver[9][2];
-    TProfile *prCos_diffPhiPsi1_LamBar_aver[9][2];
+    TProfile *prCos_theta_aver[9][2];
+    TProfile *prCos_theta_LamBar_aver[9][2];
 
     for(int iSub=0; iSub!=2; iSub++){
         for(int iCent = 0; iCent!=9; iCent++){
-            prCos_diffPhiPsi1_aver[iCent][iSub] = (TProfile*)prCos_diffPhiPsi1[iCent][0][iSub]->Clone();
-            prCos_diffPhiPsi1_aver[iCent][iSub]->Reset();
-            prCos_diffPhiPsi1_LamBar_aver[iCent][iSub] = (TProfile*)prCos_diffPhiPsi1_LamBar[iCent][0][iSub]->Clone();
-            prCos_diffPhiPsi1_LamBar_aver[iCent][iSub]->Reset();
+            prCos_theta_aver[iCent][iSub] = (TProfile*)prCos_theta[iCent][0][iSub]->Clone();
+            prCos_theta_aver[iCent][iSub]->Reset();
+            prCos_theta_LamBar_aver[iCent][iSub] = (TProfile*)prCos_theta_LamBar[iCent][0][iSub]->Clone();
+            prCos_theta_LamBar_aver[iCent][iSub]->Reset();
             for(int iphi = 0; iphi!=6; iphi++){
                 
-                prCos_diffPhiPsi1_aver[iCent][iSub]->Add(prCos_diffPhiPsi1[iCent][iphi][iSub]);            
-                prCos_diffPhiPsi1_LamBar_aver[iCent][iSub]->Add(prCos_diffPhiPsi1_LamBar[iCent][iphi][iSub]);
+                prCos_theta_aver[iCent][iSub]->Add(prCos_theta[iCent][iphi][iSub]);            
+                prCos_theta_LamBar_aver[iCent][iSub]->Add(prCos_theta_LamBar[iCent][iphi][iSub]);
             }
         }
     }
@@ -244,7 +234,7 @@ void PxVsCent_calc(){
     
     double Pz, Pz_err;
     TF1 *FitFuncKFP = new TF1("FitFuncKFP", "gaus(0)+gaus(3) + [6] + [7]*x", 1.1, 1.13);
-    FitFuncKFP->SetParLimits(1, 1.1145, 1.1165);
+    FitFuncKFP->SetParLimits(1, 1.114, 1.117);
 	FitFuncKFP->SetParLimits(2, 0.0005, 0.0011);    
     FitFuncKFP->SetParLimits(4, 1.114, 1.117);
 	FitFuncKFP->SetParLimits(5, 0.0015, 0.005);
@@ -308,17 +298,17 @@ void PxVsCent_calc(){
                 //FitCosTetaFunc->FixParameter(1, 0.);
                 //FitCosTetaFunc->FixParameter(2, 0.);
 
-                grCos_diffPhiPsi1_Sub[iCent][iphi][iSub] = GetCosTetaSub(prCos_diffPhiPsi1[iCent][iphi][iSub], prCos_diffPhiPsi1_aver[iCent][iSub]);
+                grCos_theta_Sub[iCent][iphi][iSub] = GetCosTetaSub(prCos_theta[iCent][iphi][iSub], prCos_theta_aver[iCent][iSub]);
                 
-                grCos_diffPhiPsi1_Sub[iCent][iphi][iSub]->Fit(FitCosTetaFunc);
-                grCos_diffPhiPsi1_Sub[iCent][iphi][iSub]->Draw("AP");
+                grCos_theta_Sub[iCent][iphi][iSub]->Fit(FitCosTetaFunc);
+                grCos_theta_Sub[iCent][iphi][iSub]->Draw("AP");
 
                 Pz = FitCosTetaFunc->GetParameter(0);
                 Pz_err = FitCosTetaFunc->GetParError(0);
 
                 double phi = 2*TMath::Pi() / nOrd /12 + iphi*2*TMath::Pi() / nOrd /6;
-                grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetPoint(iphi, phi, Pz);
-                grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetPointError(iphi, 0., Pz_err);
+                grCos_thetaVsdphi[iCent][iSub]->SetPoint(iphi, phi, Pz);
+                grCos_thetaVsdphi[iCent][iSub]->SetPointError(iphi, 0., Pz_err);
                 
                 //AntiLambda
                 canv2[iphi][iSub]->cd(iCent+1);
@@ -348,28 +338,28 @@ void PxVsCent_calc(){
                 //FitCosTetaFunc->FixParameter(2, 0.);
 
                 //Subtracting
-                grCos_diffPhiPsi1_LamBar_Sub[iCent][iphi][iSub] = GetCosTetaSub(prCos_diffPhiPsi1_LamBar[iCent][iphi][iSub], prCos_diffPhiPsi1_LamBar_aver[iCent][iSub]);
+                grCos_theta_LamBar_Sub[iCent][iphi][iSub] = GetCosTetaSub(prCos_theta_LamBar[iCent][iphi][iSub], prCos_theta_LamBar_aver[iCent][iSub]);
                 
-                grCos_diffPhiPsi1_LamBar_Sub[iCent][iphi][iSub]->Fit(FitCosTetaFunc);
-                grCos_diffPhiPsi1_LamBar_Sub[iCent][iphi][iSub]->Draw("AP");
+                grCos_theta_LamBar_Sub[iCent][iphi][iSub]->Fit(FitCosTetaFunc);
+                grCos_theta_LamBar_Sub[iCent][iphi][iSub]->Draw("AP");
 
                 Pz = FitCosTetaFunc->GetParameter(0);
                 Pz_err = FitCosTetaFunc->GetParError(0);
 
                 phi = 2*TMath::Pi() / nOrd /12 + iphi*2*TMath::Pi() / nOrd /6;
-                grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetPoint(iphi, phi, Pz);
-                grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetPointError(iphi, 0., Pz_err);
+                grCos_theta_LamBarVsdphi[iCent][iSub]->SetPoint(iphi, phi, Pz);
+                grCos_theta_LamBarVsdphi[iCent][iSub]->SetPointError(iphi, 0., Pz_err);
             }//for(int iphi = 0; iphi!=6; iphi++)
             
-            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMarkerSize(3);
-            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetLineWidth(2);
-            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMarkerStyle(20);
-            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMarkerColor(1);
+            grCos_thetaVsdphi[iCent][iSub]->SetMarkerSize(3);
+            grCos_thetaVsdphi[iCent][iSub]->SetLineWidth(2);
+            grCos_thetaVsdphi[iCent][iSub]->SetMarkerStyle(20);
+            grCos_thetaVsdphi[iCent][iSub]->SetMarkerColor(1);
 
-            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMarkerSize(3);
-            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetLineWidth(2);
-            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMarkerStyle(20);
-            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMarkerColor(1);
+            grCos_theta_LamBarVsdphi[iCent][iSub]->SetMarkerSize(3);
+            grCos_theta_LamBarVsdphi[iCent][iSub]->SetLineWidth(2);
+            grCos_theta_LamBarVsdphi[iCent][iSub]->SetMarkerStyle(20);
+            grCos_theta_LamBarVsdphi[iCent][iSub]->SetMarkerColor(1);
         }//for(int iCent = 0; iCent!=9; iCent++)
     }//for(int iSub=0; iSub!=2; iSub++)
 
@@ -381,12 +371,12 @@ void PxVsCent_calc(){
 
     //...................................Fitting by phi............................................
 
-    TGraphErrors *PxVsCent_Lam[2];
-    TGraphErrors *PxVsCent_LamBar[2];
+    TGraphErrors *PzVsCent_Lam[2];
+    TGraphErrors *PzVsCent_LamBar[2];
 
     for(int iSub=0; iSub!=2; iSub++){
-        PxVsCent_Lam[iSub] = new TGraphErrors(9);
-        PxVsCent_LamBar[iSub] = new TGraphErrors(9);
+        PzVsCent_Lam[iSub] = new TGraphErrors(9);
+        PzVsCent_LamBar[iSub] = new TGraphErrors(9);
     }
 
     TCanvas *c[4];
@@ -399,7 +389,7 @@ void PxVsCent_calc(){
     c[2]->SetTitle("LambdaBar, Psi_e/w");
     c[3]->SetTitle("LambdaBar, Psi_comb");
 
-    TGaxis::SetMaxDigits(1);
+    //TGaxis::SetMaxDigits(1);
     //gStyle->SetOptFit(0001);
 
 
@@ -407,27 +397,26 @@ void PxVsCent_calc(){
 
     TF1 *fitFuncOfCos = new TF1("fitFuncOfCos", Form("[0] + 2*[1]*sin(%i*x) + 2*[2]*cos(%i*x)", nOrd, nOrd), 0, 2*TMath::Pi()/nOrd);
 
-    fitFuncOfCos->FixParameter(0, 0);
+    //fitFuncOfCos->FixParameter(0, 0);
     fitFuncOfCos->SetParLimits(1, -1, 1);
-    fitFuncOfCos->FixParameter(2, 0);
+    //fitFuncOfCos->FixParameter(2, 0);
 
-    double Px, Px_err;
     
     for(int iCent=0; iCent!=9; iCent++){
         for(int iSub=0; iSub!=2; iSub++){
 
             //Set Y titles
-            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetTitle("<cos(#phi_{#Lambda}-#Psi_{1})>");
-            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitle("<cos(#phi_{#bar{#Lambda}}-#Psi_{1})>");
+            grCos_thetaVsdphi[iCent][iSub]->GetYaxis()->SetTitle("<cos(#phi_{#Lambda}-#Psi_{1})>");
+            grCos_theta_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitle("<cos(#phi_{#bar{#Lambda}}-#Psi_{1})>");
 
-            if(iSub == 0){grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMinimum(-0.002); grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMaximum(0.0015);}
-            if(iSub == 1){grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMinimum(-0.002); grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMaximum(0.002);}
-            if(iSub == 0){grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.006); grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMaximum(0.006);}
-            if(iSub == 1){grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.005); grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMaximum(0.008);}
+            if(iSub == 0){grCos_thetaVsdphi[iCent][iSub]->SetMinimum(-0.002); grCos_thetaVsdphi[iCent][iSub]->SetMaximum(0.003);}
+            if(iSub == 1){grCos_thetaVsdphi[iCent][iSub]->SetMinimum(-0.006); grCos_thetaVsdphi[iCent][iSub]->SetMaximum(0.006);}
+            if(iSub == 0){grCos_theta_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.003); grCos_theta_LamBarVsdphi[iCent][iSub]->SetMaximum(0.005);}
+            if(iSub == 1){grCos_theta_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.008); grCos_theta_LamBarVsdphi[iCent][iSub]->SetMaximum(0.008);}
 
             //Set graph titles
-            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetTitle(Form("#Lambda centrality, %i-%i", cent_lim[8-iCent], cent_lim[9-iCent]));
-            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetTitle(Form("#bar{#Lambda} centrality, %i-%i", cent_lim[8-iCent], cent_lim[9-iCent]));
+            grCos_thetaVsdphi[iCent][iSub]->SetTitle(Form("#Lambda centrality, %i-%i", cent_lim[8-iCent], cent_lim[9-iCent]));
+            grCos_theta_LamBarVsdphi[iCent][iSub]->SetTitle(Form("#bar{#Lambda} centrality, %i-%i", cent_lim[8-iCent], cent_lim[9-iCent]));
             
 
             //Drawing           
@@ -436,207 +425,200 @@ void PxVsCent_calc(){
             if(iCent == 2 || iCent == 5 || iCent == 8){
                 gPad->SetLeftMargin(0.25);
                 gPad->SetRightMargin(0.02);
-                grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(1);
-                grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
-                grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetLabelSize(0.1);
+                grCos_thetaVsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(1);
+                grCos_thetaVsdphi[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+                grCos_thetaVsdphi[iCent][iSub]->GetYaxis()->SetLabelSize(0.1);
             }
-            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->Fit("fitFuncOfCos");
-            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->Draw("AP");
+            grCos_thetaVsdphi[iCent][iSub]->Fit("fitFuncOfCos");
+            grCos_thetaVsdphi[iCent][iSub]->Draw("AP");
             
-            Px = fitFuncOfCos->GetParameter(1);
-            Px_err = fitFuncOfCos->GetParError(1);
-            PxVsCent_Lam[iSub]->SetPoint(8-iCent, cent[8-iCent], Px);
-            PxVsCent_Lam[iSub]->SetPointError(8-iCent, 0, Px_err);
+            Pz = fitFuncOfCos->GetParameter(2);
+            Pz_err = fitFuncOfCos->GetParError(2);
+            PzVsCent_Lam[iSub]->SetPoint(8-iCent, cent[8-iCent], Pz);
+            PzVsCent_Lam[iSub]->SetPointError(8-iCent, 0, Pz_err);
 
 
             c[iSub+2]->cd(9-iCent);
             if(iCent == 2 || iCent == 5 || iCent == 8){
                 gPad->SetLeftMargin(0.25);
                 gPad->SetRightMargin(0.02);
-                grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(1);
-                grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
-                grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetLabelSize(0.1);
+                grCos_theta_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(1);
+                grCos_theta_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
+                grCos_theta_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetLabelSize(0.1);
             }
-            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->Draw("AP");
-            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->Fit("fitFuncOfCos");
+            grCos_theta_LamBarVsdphi[iCent][iSub]->Draw("AP");
+            grCos_theta_LamBarVsdphi[iCent][iSub]->Fit("fitFuncOfCos");
 
-            Px = fitFuncOfCos->GetParameter(1);
-            Px_err = fitFuncOfCos->GetParError(1);
-            PxVsCent_LamBar[iSub]->SetPoint(8-iCent, cent[8-iCent]+0.5, Px);
-            PxVsCent_LamBar[iSub]->SetPointError(8-iCent, 0, Px_err);
+            Pz = fitFuncOfCos->GetParameter(2);
+            Pz_err = fitFuncOfCos->GetParError(2);
+            PzVsCent_LamBar[iSub]->SetPoint(8-iCent, cent[8-iCent]+0.5, Pz);
+            PzVsCent_LamBar[iSub]->SetPointError(8-iCent, 0, Pz_err);
+            if(iSub == 1 && iCent == 2) cout<<"50-60\% err="<<Pz_err<<endl;
+            if(iSub == 1 && iCent == 1) cout<<"60-70\% err="<<Pz_err<<endl;
         }
     }
     //...................................end of Fitting by phi........................................
 
     //Res factor correction
     for(int iSub=0; iSub!=2; iSub++){
-        PxVsCent_Lam[iSub] = ResFactCorr(PxVsCent_Lam[iSub], Res_1VsCent[1]);
-        PxVsCent_LamBar[iSub] = ResFactCorr(PxVsCent_LamBar[iSub], Res_1VsCent[1]);
 
         if(nOrd == 2)
         {
-            PxVsCent_Lam[iSub] = ResFactCorr(PxVsCent_Lam[iSub], Res_2VsCent[iSub]);
-            PxVsCent_LamBar[iSub] = ResFactCorr(PxVsCent_LamBar[iSub], Res_2VsCent[iSub]);
+            PzVsCent_Lam[iSub] = ResFactCorr(PzVsCent_Lam[iSub], Res_2VsCent[iSub]);
+            PzVsCent_LamBar[iSub] = ResFactCorr(PzVsCent_LamBar[iSub], Res_2VsCent[iSub]);
         }
 
         if(nOrd == 3)
         {
-            PxVsCent_Lam[iSub] = ResFactCorr(PxVsCent_Lam[iSub], Res_3VsCent[iSub]);
-            PxVsCent_LamBar[iSub] = ResFactCorr(PxVsCent_LamBar[iSub], Res_3VsCent[iSub]);
+            PzVsCent_Lam[iSub] = ResFactCorr(PzVsCent_Lam[iSub], Res_3VsCent[iSub]);
+            PzVsCent_LamBar[iSub] = ResFactCorr(PzVsCent_LamBar[iSub], Res_3VsCent[iSub]);
+            if(iSub==1) cout<<"60-70\% err="<<PzVsCent_LamBar[iSub]->GetErrorY(7)<<"   50-60\% err="<<PzVsCent_LamBar[iSub]->GetErrorY(6)<<endl;
         }
 
-        if(sinUsage){
-            PxVsCent_Lam[iSub] = MultiplyLamFactor(PxVsCent_Lam[iSub], 3/alpha_Lam);
-            PxVsCent_LamBar[iSub] = MultiplyLamFactor(PxVsCent_LamBar[iSub], 3/alpha_LamBar);
-        }
+        PzVsCent_Lam[iSub] = MultiplyLamFactor(PzVsCent_Lam[iSub], 3/alpha_Lam);
+        PzVsCent_LamBar[iSub] = MultiplyLamFactor(PzVsCent_LamBar[iSub], 3/alpha_LamBar);
+        if(iSub==1) cout<<"60-70\% err="<<PzVsCent_LamBar[iSub]->GetErrorY(7)<<"   50-60\% err="<<PzVsCent_LamBar[iSub]->GetErrorY(6)<<endl;       
 
-        if(!sinUsage){
-            PxVsCent_Lam[iSub] = MultiplyLamFactor(PxVsCent_Lam[iSub], 8/alpha_Lam / TMath::Pi());
-            PxVsCent_LamBar[iSub] = MultiplyLamFactor(PxVsCent_LamBar[iSub], 8/alpha_LamBar / TMath::Pi());
-        }
-        
+        PzVsCent_Lam[iSub] = MultiplyLamFactor(PzVsCent_Lam[iSub], 100);
+        PzVsCent_LamBar[iSub] = MultiplyLamFactor(PzVsCent_LamBar[iSub], 100);
+        if(iSub==1) cout<<"60-70\% err="<<PzVsCent_LamBar[iSub]->GetErrorY(7)<<"   50-60\% err="<<PzVsCent_LamBar[iSub]->GetErrorY(6)<<endl;
 
-        PxVsCent_Lam[iSub] = MultiplyLamFactor(PxVsCent_Lam[iSub], 100);
-        PxVsCent_LamBar[iSub] = MultiplyLamFactor(PxVsCent_LamBar[iSub], 100);
-
-        PxVsCent_Lam[iSub] = MakeAverageBin(PxVsCent_Lam[iSub], 8, 9);
-        PxVsCent_LamBar[iSub] = MakeAverageBin(PxVsCent_LamBar[iSub], 8, 9);
+        PzVsCent_Lam[iSub] = MakeAverageBin(PzVsCent_Lam[iSub], 8, 9);
+        PzVsCent_LamBar[iSub] = MakeAverageBin(PzVsCent_LamBar[iSub], 8, 9);
 
     }
 
     //Writing histograms to file
-    TGraphErrors *PxVsCent_Tog[2];
+    TGraphErrors *PzVsCent_Tog[2];
     
     for(int iSub=0; iSub!=2; iSub++){
 
-        //PxVsCent_Lam[iSub]=MakeAverageBin(PxVsCent_Lam[iSub], 7, 8);
-        //PxVsCent_LamBar[iSub]=MakeAverageBin(PxVsCent_LamBar[iSub], 7, 8);
-
         //Lam+LamBar
-        PxVsCent_Tog[iSub] = MakeAverage(PxVsCent_Lam[iSub], PxVsCent_LamBar[iSub]);
+        PzVsCent_Tog[iSub] = MakeAverage(PzVsCent_Lam[iSub], PzVsCent_LamBar[iSub]);
 
         //writing histograms
-        PxVsCent_Lam[iSub]->SetName(Form("PxVsCent_Lam_%i", iSub));
-        PxVsCent_LamBar[iSub]->SetName(Form("PxVsCent_LamBar_%i", iSub));
-        PxVsCent_Tog[iSub]->SetName(Form("PxVsCent_Tog_%i", iSub));
+        PzVsCent_Lam[iSub]->SetName(Form("PzVsCent_Lam_%i", iSub));
+        PzVsCent_LamBar[iSub]->SetName(Form("PzVsCent_LamBar_%i", iSub));
+        PzVsCent_Tog[iSub]->SetName(Form("PzVsCent_Tog_%i", iSub));
         if(iSub == 0){
-            PxVsCent_Lam[iSub]->SetTitle(Form("PxVsCent for #Lambda, if #Psi%i_{e/w} used", nOrd));
-            PxVsCent_LamBar[iSub]->SetTitle(Form("PxVsCent for #bar{#Lambda}, if #Psi%i_{e/w} used", nOrd));
-            PxVsCent_Tog[iSub]->SetTitle(Form("PxVsCent for #Lambda + #bar{#Lambda}, if #Psi%i_{e/w} used", nOrd));
+            PzVsCent_Lam[iSub]->SetTitle(Form("PzVsCent for #Lambda, if #Psi%i_{e/w} used", nOrd));
+            PzVsCent_LamBar[iSub]->SetTitle(Form("PzVsCent for #bar{#Lambda}, if #Psi%i_{e/w} used", nOrd));
+            PzVsCent_Tog[iSub]->SetTitle(Form("PzVsCent for #Lambda + #bar{#Lambda}, if #Psi%i_{e/w} used", nOrd));
         }
         if(iSub == 1){
-            PxVsCent_Lam[iSub]->SetTitle(Form("PxVsCent for #Lambda, if #Psi%i_{comb} used", nOrd));
-            PxVsCent_LamBar[iSub]->SetTitle(Form("PxVsCent for #bar{#Lambda}, if #Psi%i_{comb} used", nOrd));
-            PxVsCent_Tog[iSub]->SetTitle(Form("PxVsCent for #Lambda + #bar{#Lambda}, if #Psi%i_{comb} used", nOrd));
+            PzVsCent_Lam[iSub]->SetTitle(Form("PzVsCent for #Lambda, if #Psi%i_{comb} used", nOrd));
+            PzVsCent_LamBar[iSub]->SetTitle(Form("PzVsCent for #bar{#Lambda}, if #Psi%i_{comb} used", nOrd));
+            PzVsCent_Tog[iSub]->SetTitle(Form("PzVsCent for #Lambda + #bar{#Lambda}, if #Psi%i_{comb} used", nOrd));
         }
-        PxVsCent_Lam[iSub]->Write();
-        PxVsCent_LamBar[iSub]->Write();
-        PxVsCent_Tog[iSub]->Write();
+        //PzVsCent_Lam[iSub]->Write();
+        //PzVsCent_LamBar[iSub]->Write();
+        //PzVsCent_Tog[iSub]->Write();
     }
     
-    output->Close();
+    //output->Close();  
+
     
-    //Drawing Px Vs Centrality
-    TCanvas *c_px[2];
-    TCanvas *c_px_full = new TCanvas("c_px_full", "", 0, 1024, 1800, 900);
-    c_px_full->Divide(2, 1, 0.0, 0.0);
-    TMultiGraph *mgPxVsCent[2];
-    TLegend *leg_px[2];
+    //Drawing Pz Vs Centrality
+    TCanvas *c_Pz[2];
+    TCanvas *c_Pz_full = new TCanvas("c_Pz_full", "", 0, 1024, 1800, 900);
+    c_Pz_full->Divide(2, 1, 0.0, 0.0);
+    TMultiGraph *mgPzVsCent[2];
+    TLegend *leg_Pz[2];
     for(int iSub = 0; iSub!=2; iSub++){
-        c_px[iSub] = new TCanvas(Form("c_px_%i", iSub), "", 0, 1024, 1200, 1024);
+        c_Pz[iSub] = new TCanvas(Form("c_Pz_%i", iSub), "", 0, 1024, 1200, 1024);
 
-        c_px[iSub]->cd();
-        PxVsCent_Lam[iSub]->SetMarkerSize(3);
-        PxVsCent_Lam[iSub]->SetLineWidth(2);
-        PxVsCent_Lam[iSub]->SetMarkerStyle(29);
-        PxVsCent_Lam[iSub]->SetMarkerColor(634);
-        PxVsCent_Lam[iSub]->SetLineColor(634);
+        c_Pz[iSub]->cd();
+        PzVsCent_Lam[iSub]->SetMarkerSize(3);
+        PzVsCent_Lam[iSub]->SetLineWidth(2);
+        PzVsCent_Lam[iSub]->SetMarkerStyle(29);
+        PzVsCent_Lam[iSub]->SetMarkerColor(634);
+        PzVsCent_Lam[iSub]->SetLineColor(634);
 
-        PxVsCent_LamBar[iSub]->SetMarkerSize(3);
-        PxVsCent_LamBar[iSub]->SetLineWidth(2);
-        PxVsCent_LamBar[iSub]->SetMarkerStyle(30);
-        PxVsCent_LamBar[iSub]->SetMarkerColor(602);
-        PxVsCent_LamBar[iSub]->SetLineColor(602);
+        PzVsCent_LamBar[iSub]->SetMarkerSize(3);
+        PzVsCent_LamBar[iSub]->SetLineWidth(2);
+        PzVsCent_LamBar[iSub]->SetMarkerStyle(30);
+        PzVsCent_LamBar[iSub]->SetMarkerColor(602);
+        PzVsCent_LamBar[iSub]->SetLineColor(602);
 
-        mgPxVsCent[iSub] = new TMultiGraph();
-        mgPxVsCent[iSub]->Add(PxVsCent_Lam[iSub]);
-        mgPxVsCent[iSub]->Add(PxVsCent_LamBar[iSub]);
+        mgPzVsCent[iSub] = new TMultiGraph();
+        mgPzVsCent[iSub]->Add(PzVsCent_Lam[iSub]);
+        mgPzVsCent[iSub]->Add(PzVsCent_LamBar[iSub]);
 
-        mgPxVsCent[iSub]->GetXaxis()->SetTitle("centrality %");
-        mgPxVsCent[iSub]->GetYaxis()->SetTitle(Form("<P_{x}sin(2#phi - 2#Psi_{%i})> %%", nOrd));
-        mgPxVsCent[iSub]->Draw("AP");
+        mgPzVsCent[iSub]->GetXaxis()->SetTitle("centrality %");
+        mgPzVsCent[iSub]->GetYaxis()->SetTitle(Form("<P_{z}sin(%i(#phi - #Psi_{%i}))> %%", nOrd, nOrd));
+        mgPzVsCent[iSub]->Draw("AP");
         funcOfZero->Draw("same");
 
-        leg_px[iSub] = new TLegend();
-        leg_px[iSub]->SetBorderSize(0);
-        leg_px[iSub]->AddEntry(PxVsCent_Lam[iSub], "#Lambda", "p");
-        leg_px[iSub]->AddEntry(PxVsCent_LamBar[iSub], "#bar{#Lambda}", "p");
-        if(iSub==0) leg_px[iSub]->AddEntry((TObject*) 0, "#Psi_{e/w} was used", "");
-        if(iSub==1) leg_px[iSub]->AddEntry((TObject*) 0, "#Psi_{comb} was used", "");
+        leg_Pz[iSub] = new TLegend();
+        leg_Pz[iSub]->SetBorderSize(0);
+        leg_Pz[iSub]->AddEntry(PzVsCent_Lam[iSub], "#Lambda", "p");
+        leg_Pz[iSub]->AddEntry(PzVsCent_LamBar[iSub], "#bar{#Lambda}", "p");
+        if(iSub==0) leg_Pz[iSub]->AddEntry((TObject*) 0, "#Psi_{e/w} was used", "");
+        if(iSub==1) leg_Pz[iSub]->AddEntry((TObject*) 0, "#Psi_{comb} was used", "");
 
-        leg_px[iSub]->Draw("same");
+        leg_Pz[iSub]->Draw("same");
 
-        c_px_full->cd(iSub+1);
+        c_Pz_full->cd(iSub+1);
         if(iSub==0) {gPad->SetRightMargin(0); gPad->SetLeftMargin(0.2); }
         if(iSub==1) {gPad->SetLeftMargin(0); gPad->SetRightMargin(0.2);}
-        mgPxVsCent[iSub]->SetMaximum(4);
-        mgPxVsCent[iSub]->SetMinimum(-4);
-        mgPxVsCent[iSub]->Draw("AP");
+        //mgPzVsCent[iSub]->SetMaximum(1);
+        //mgPzVsCent[iSub]->SetMinimum(-1.5);
+        mgPzVsCent[iSub]->Draw("AP");
         funcOfZero->Draw("same");
-        leg_px[iSub]->Draw("same");
+        leg_Pz[iSub]->Draw("same");
         
     }
 
     
-    TCanvas *c_pxtog = new TCanvas("c_pxtog", "", 0, 1024, 1200, 1024);
-    c_pxtog->cd();
+    TCanvas *c_Pztog = new TCanvas("c_Pztog", "", 0, 1024, 1200, 1024);
+    c_Pztog->cd();
 
     
-    TMultiGraph *mgPxVsCent_Tog = new TMultiGraph();
+    TMultiGraph *mgPzVsCent_Tog = new TMultiGraph();
 
     
-    for(int iCent=0; iCent!=PxVsCent_Tog[0]->GetN(); iCent++){
-        PxVsCent_Tog[1]->SetPointX(iCent, PxVsCent_Tog[0]->GetPointX(iCent) + 0.5);
+    for(int iCent=0; iCent!=PzVsCent_Tog[0]->GetN(); iCent++){
+        PzVsCent_Tog[1]->SetPointX(iCent, cent[iCent] + 0.5);
     }
 
-    PxVsCent_Tog[0]->SetMarkerStyle(34);
-    PxVsCent_Tog[0]->SetMarkerColor(1);
-    PxVsCent_Tog[0]->SetLineColor(1);
+    PzVsCent_Tog[0]->SetMarkerStyle(34);
+    PzVsCent_Tog[0]->SetMarkerColor(1);
+    PzVsCent_Tog[0]->SetLineColor(1);
 
-    PxVsCent_Tog[1]->SetMarkerStyle(75);
-    PxVsCent_Tog[1]->SetMarkerColor(634);
-    PxVsCent_Tog[1]->SetLineColor(634);
+    PzVsCent_Tog[1]->SetMarkerStyle(75);
+    PzVsCent_Tog[1]->SetMarkerColor(634);
+    PzVsCent_Tog[1]->SetLineColor(634);
 
-    mgPxVsCent_Tog->Add(PxVsCent_Tog[0]);
-    mgPxVsCent_Tog->Add(PxVsCent_Tog[1]);
+    mgPzVsCent_Tog->Add(PzVsCent_Tog[0]);
+    mgPzVsCent_Tog->Add(PzVsCent_Tog[1]);
 
-    mgPxVsCent_Tog->GetXaxis()->SetTitle("centrality %");
-    mgPxVsCent_Tog->GetYaxis()->SetTitle(Form("<P_{x}sin(2#phi - 2#Psi_{%i})> %%", nOrd));
-    mgPxVsCent_Tog->SetMinimum(-2);
-    mgPxVsCent_Tog->SetMaximum(2);
-    mgPxVsCent_Tog->Draw("AP");
+    mgPzVsCent_Tog->GetXaxis()->SetTitle("centrality %");
+    mgPzVsCent_Tog->GetYaxis()->SetTitle(Form("<P_{z}sin(%i(#phi - #Psi_{%i}))> %%", nOrd, nOrd));
+    //mgPzVsCent_Tog->SetMinimum(-1);
+    //mgPzVsCent_Tog->SetMaximum(1);
+    mgPzVsCent_Tog->Draw("AP");
     funcOfZero->Draw("same");
 
-    TLegend *leg_pxtog = new TLegend();
-    leg_pxtog->SetBorderSize(0);
+    TLegend *leg_Pztog = new TLegend();
+    leg_Pztog->SetBorderSize(0);
 
-    leg_pxtog->AddEntry(PxVsCent_Tog[0], "#Lambda + #bar{#Lambda}, if #Psi_{e/w} used", "p");
-    leg_pxtog->AddEntry(PxVsCent_Tog[1], "#Lambda + #bar{#Lambda}, if #Psi_{comb} used", "p");
-    leg_pxtog->AddEntry((TObject*) 0, "Average in 20-50\% range centrality:", "");
+    leg_Pztog->AddEntry(PzVsCent_Tog[0], "#Lambda + #bar{#Lambda}, if #Psi_{e/w} used", "p");
+    leg_Pztog->AddEntry(PzVsCent_Tog[1], "#Lambda + #bar{#Lambda}, if #Psi_{comb} used", "p");
+    leg_Pztog->AddEntry((TObject*) 0, "Average in 20-50\% range centrality:", "");
     
 
-    TGraphErrors *Px_20_50[2];
+    TGraphErrors *Pz_20_50[2];
 
     for(int iSub = 0; iSub!=2; iSub++){
-        Px_20_50[iSub] = MakeAverageBin(PxVsCent_Tog[iSub], 4, 6);
-        double Px_aver = Px_20_50[iSub]->GetPointY(3);
-        double Px_aver_err = Px_20_50[iSub]->GetErrorY(3);
-        leg_pxtog->AddEntry(PxVsCent_Tog[iSub], Form("<P_{x}> = %.2f #pm %.2f", Px_aver, Px_aver_err), "p");
+        Pz_20_50[iSub] = MakeAverageBin(PzVsCent_Tog[iSub], 4, 6);
+        double Pz_aver = Pz_20_50[iSub]->GetPointY(3);
+        double Pz_aver_err = Pz_20_50[iSub]->GetErrorY(3);
+        leg_Pztog->AddEntry(PzVsCent_Tog[iSub], Form("<P_{x}> = %.2f #pm %.2f", Pz_aver, Pz_aver_err), "p");
     }
 
     
     
-    leg_pxtog->Draw("same");
+    leg_Pztog->Draw("same");
 
 }
 

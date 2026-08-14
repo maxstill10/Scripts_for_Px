@@ -26,14 +26,19 @@ TGraphErrors* MakeAverage( TGraphErrors *g1, TGraphErrors *g2 );
 void comparingPhVsCent(){
     TFile *inputFirst = new TFile("../output/output_PhVsCent_SinInclude_14p5.root", "read");
     TFile *inputSecond = new TFile("../output/output_PhVsCent_ConstSine_14p5.root", "read");
+    TFile *inputThird = new TFile("../output/output_PhModulationsVsCent_forPsi2_ConstSine_14p5.root", "read");
+    
 
     TGraphErrors *PxVsCentLamFirst = (TGraphErrors*)inputFirst->Get("PhVsCent_Lam");
-    TGraphErrors *PxVsCentLamSecond = (TGraphErrors*)inputSecond->Get("PhVsCent_Lam");
     TGraphErrors *PxVsCentLamBarFirst = (TGraphErrors*)inputFirst->Get("PhVsCent_LamBar");
+    TGraphErrors *PxVsCentLamSecond = (TGraphErrors*)inputSecond->Get("PhVsCent_Lam");    
     TGraphErrors *PxVsCentLamBarSecond = (TGraphErrors*)inputSecond->Get("PhVsCent_LamBar");
+    TGraphErrors *PxVsCentLamThird = (TGraphErrors*)inputThird->Get("PhVsCent_Lam_1");
+    TGraphErrors *PxVsCentLamBarThird = (TGraphErrors*)inputThird->Get("PhVsCent_LamBar_1");
 
     TGraphErrors *PxVsCentFirst = MakeAverage(PxVsCentLamFirst, PxVsCentLamBarFirst);
     TGraphErrors *PxVsCentSecond = MakeAverage(PxVsCentLamSecond, PxVsCentLamBarSecond);
+    TGraphErrors *PxVsCentThird = MakeAverage(PxVsCentLamThird, PxVsCentLamBarThird);
 
     PxVsCentFirst->SetMarkerSize(3);
     PxVsCentFirst->SetLineWidth(2);
@@ -46,6 +51,30 @@ void comparingPhVsCent(){
     PxVsCentSecond->SetMarkerStyle(30);
     PxVsCentSecond->SetMarkerColor(602);
     PxVsCentSecond->SetLineColor(602);
+
+    PxVsCentLamSecond->SetMarkerSize(3);
+    PxVsCentLamSecond->SetLineWidth(2);
+    PxVsCentLamSecond->SetMarkerStyle(29);
+    PxVsCentLamSecond->SetMarkerColor(634);
+    PxVsCentLamSecond->SetLineColor(634);
+
+    PxVsCentLamBarSecond->SetMarkerSize(3);
+    PxVsCentLamBarSecond->SetLineWidth(2);
+    PxVsCentLamBarSecond->SetMarkerStyle(76);
+    PxVsCentLamBarSecond->SetMarkerColor(602);
+    PxVsCentLamBarSecond->SetLineColor(602);
+
+    PxVsCentLamThird->SetMarkerSize(3);
+    PxVsCentLamThird->SetLineWidth(2);
+    PxVsCentLamThird->SetMarkerStyle(34);
+    PxVsCentLamThird->SetMarkerColor(635);
+    PxVsCentLamThird->SetLineColor(635);
+
+    PxVsCentLamBarThird->SetMarkerSize(3);
+    PxVsCentLamBarThird->SetLineWidth(2);
+    PxVsCentLamBarThird->SetMarkerStyle(75);
+    PxVsCentLamBarThird->SetMarkerColor(603);
+    PxVsCentLamBarThird->SetLineColor(603);
 
     for(int iCent = 0; iCent!=PxVsCentSecond->GetN(); iCent++){
         double x = PxVsCentSecond->GetPointX(iCent);
@@ -82,6 +111,35 @@ void comparingPhVsCent(){
     PxVsCent_First_Second->Draw("AP");
     funcOfZero->Draw("same");
     leg_first_second->Draw("same");
+
+    //
+    TCanvas *c_Second_Third = new TCanvas("c_Second_Third", "", 0, 1024, 1200, 1024);
+    
+    c_Second_Third->cd();
+    TMultiGraph *PxVsCent_Second_Third = new TMultiGraph();
+
+    PxVsCent_Second_Third->Add(PxVsCentLamSecond);
+    PxVsCent_Second_Third->Add(PxVsCentLamBarSecond);
+    PxVsCent_Second_Third->Add(PxVsCentLamThird);
+    PxVsCent_Second_Third->Add(PxVsCentLamBarThird);
+
+    PxVsCent_Second_Third->GetXaxis()->SetTitle("centrality %");
+    PxVsCent_Second_Third->GetYaxis()->SetTitle("<P_{h}> %");
+    PxVsCent_Second_Third->SetMinimum(-0.4);
+    PxVsCent_Second_Third->SetMaximum(2.4);
+
+    TLegend *leg_Second_Third = new TLegend();
+
+    leg_Second_Third->AddEntry((TObject*) 0, "P_{h} of #Lambda + #bar{#Lambda}, #Psi_{2,comb} used", "");
+    leg_Second_Third->AddEntry(PxVsCentLamSecond, "#Lambda, Ph average", "p");
+    leg_Second_Third->AddEntry(PxVsCentLamBarSecond, "#bar{#Lambda} Ph average", "p");
+    leg_Second_Third->AddEntry(PxVsCentLamThird, "#Lambda, Ph extracter", "p");
+    leg_Second_Third->AddEntry(PxVsCentLamBarThird, "#bar{#Lambda} Ph extracted", "p");
+    leg_Second_Third->SetBorderSize(0);
+
+    PxVsCent_Second_Third->Draw("AP");
+    funcOfZero->Draw("same");
+    leg_Second_Third->Draw("same");
 
     
 }

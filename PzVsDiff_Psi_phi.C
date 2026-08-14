@@ -121,15 +121,15 @@ void PzVsDiff_Psi_phi(){
         c_lam_20_50[iSub] = new TCanvas(Form("c_lam_20_50_%i", iSub), Form("c_lam_20_50_%i", iSub), 0, 1024, 1800, 1024);
         c_lamBar_20_50[iSub] = new TCanvas(Form("c_lamBar_20_50_%i", iSub), Form("c_lamBar_20_50_%i", iSub), 0, 1024, 1800, 1024);
 
-        c_Cos_theta_20_50[iSub] = new TCanvas(Form("c_Cos_theta_20_50_%i", iSub), Form("c_Cos_theta_20_50_%i", iSub), 0, 1024, 1800, 1024);
-        c_Cos_theta_LamBar_20_50[iSub] = new TCanvas(Form("c_Cos_theta_LamBar_20_50_%i", iSub), Form("c_Cos_theta_LamBar_20_50_%i", iSub), 0, 1024, 1800, 1024);
+        c_Cos_theta_20_50[iSub] = new TCanvas(Form("c_Cos_theta_20_50_%i", iSub), Form("c_Cos_theta_20_50_%i", iSub), 0, 1024, 1600, 1024);
+        c_Cos_theta_LamBar_20_50[iSub] = new TCanvas(Form("c_Cos_theta_LamBar_20_50_%i", iSub), Form("c_Cos_theta_LamBar_20_50_%i", iSub), 0, 1024, 1600, 1024);
 
         
         c_lam_20_50[iSub]->Divide(3, 2);
         c_lamBar_20_50[iSub]->Divide(3, 2);
 
-        c_Cos_theta_20_50[iSub]->Divide(3, 2);
-        c_Cos_theta_LamBar_20_50[iSub]->Divide(3, 2);
+        c_Cos_theta_20_50[iSub]->Divide(3, 2, 0, 0);
+        c_Cos_theta_LamBar_20_50[iSub]->Divide(3, 2, 0, 0);
     }
     
     //Fit function init
@@ -194,9 +194,21 @@ void PzVsDiff_Psi_phi(){
             
 
             c_Cos_theta_20_50[iSub]->cd(iphi+1);
+            if(iphi<3) gPad->SetBottomMargin(0);
+            else gPad->SetTopMargin(0);
+            if(iphi!=2 && iphi!=5) gPad->SetRightMargin(0);
+            if(iphi!=0 && iphi!=3) gPad->SetLeftMargin(0);
             
             //subtracting
             grCos_theta_Sub_20_50[iphi][iSub] = GetCosTetaSub(prCos_theta_20_50[iphi][iSub], prCos_theta_20_50_aver[iSub]);
+
+            if(iSub == 0) {grCos_theta_Sub_20_50[iphi][iSub]->SetMaximum(0.01); grCos_theta_Sub_20_50[iphi][iSub]->SetMinimum(-0.015);}
+            if(iSub == 1) {grCos_theta_Sub_20_50[iphi][iSub]->SetMaximum(0.01); grCos_theta_Sub_20_50[iphi][iSub]->SetMinimum(-0.015);}
+            if(iSub == 2) {grCos_theta_Sub_20_50[iphi][iSub]->SetMaximum(0.01); grCos_theta_Sub_20_50[iphi][iSub]->SetMinimum(-0.01);}
+            if(iSub == 3) {grCos_theta_Sub_20_50[iphi][iSub]->SetMaximum(0.025); grCos_theta_Sub_20_50[iphi][iSub]->SetMinimum(-0.025);}
+
+            if(iSub<2) grCos_theta_Sub_20_50[iphi][iSub]->SetTitle(Form("#Lambda, #Delta#phi = (%i#pi/6, %i#pi/6)", iphi, iphi+1));
+            else if(iSub<4) grCos_theta_Sub_20_50[iphi][iSub]->SetTitle(Form("#Lambda, #Delta#phi = (%i#pi/9, %i#pi/9)", iphi, iphi+1));
             //grCos_theta_Sub_20_50[iphi][iSub] = ConvertProfToGraph(prCos_theta_20_50[iphi][iSub]);
 
             FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
@@ -232,10 +244,22 @@ void PzVsDiff_Psi_phi(){
 
             //<Cos(phi-Psi1)>
             c_Cos_theta_LamBar_20_50[iSub]->cd(iphi+1);
+            if(iphi<3) gPad->SetBottomMargin(0);
+            else gPad->SetTopMargin(0);
+            if(iphi!=2 && iphi!=5) gPad->SetRightMargin(0);
+            if(iphi!=0 && iphi!=3) gPad->SetLeftMargin(0);
             
             //Subtracting
             grCos_theta_LamBar_Sub_20_50[iphi][iSub] = GetCosTetaSub(prCos_theta_LamBar_20_50[iphi][iSub], prCos_theta_LamBar_20_50_aver[iSub]);
+
+            if(iSub == 0) {grCos_theta_LamBar_Sub_20_50[iphi][iSub]->SetMaximum(0.02); grCos_theta_LamBar_Sub_20_50[iphi][iSub]->SetMinimum(-0.025);}
+            if(iSub == 1) {grCos_theta_LamBar_Sub_20_50[iphi][iSub]->SetMaximum(0.04); grCos_theta_LamBar_Sub_20_50[iphi][iSub]->SetMinimum(-0.025);}
+            if(iSub == 2) {grCos_theta_LamBar_Sub_20_50[iphi][iSub]->SetMaximum(0.03); grCos_theta_LamBar_Sub_20_50[iphi][iSub]->SetMinimum(-0.02);}
+            if(iSub == 3) {grCos_theta_LamBar_Sub_20_50[iphi][iSub]->SetMaximum(0.06); grCos_theta_LamBar_Sub_20_50[iphi][iSub]->SetMinimum(-0.07);}
+
             //grCos_theta_LamBar_Sub_20_50[iphi][iSub] = ConvertProfToGraph(prCos_theta_LamBar_20_50[iphi][iSub]);
+            if(iSub<2) grCos_theta_LamBar_Sub_20_50[iphi][iSub]->SetTitle(Form("#bar{#Lambda}, #Delta#phi = (%i#pi/6, %i#pi/6)", iphi, iphi+1));
+            else if(iSub<4) grCos_theta_LamBar_Sub_20_50[iphi][iSub]->SetTitle(Form("#bar{#Lambda}, #Delta#phi = (%i#pi/9, %i#pi/9)", iphi, iphi+1));
 
             FitCosTetaFunc = new TF1("FitCosTetaFunc", MyFitFunc, 1.1, 1.13, 3);
             
@@ -585,8 +609,8 @@ TGraphErrors* GetCosTetaSub(TProfile* prof){
     
     graph_cos_sub->GetXaxis()->SetTitle("#phi - #Psi_{2}");
     graph_cos_sub->GetYaxis()->SetTitle("<cos(#theta)>");
-    graph_cos_sub->GetXaxis()->SetLabelSize(0.1);
-    graph_cos_sub->GetYaxis()->SetLabelSize(0.1);
+    //graph_cos_sub->GetXaxis()->SetLabelSize(0.1);
+    //graph_cos_sub->GetYaxis()->SetLabelSize(0.1);
     
     return graph_cos_sub;
 }
@@ -640,8 +664,8 @@ TGraphErrors* GetCosTetaSub(TProfile* prof, TProfile* prof_aver){
     
     gr_out->GetXaxis()->SetTitle("#phi - #Psi_{2}");
     gr_out->GetYaxis()->SetTitle("<cos(#theta)>");
-    gr_out->GetXaxis()->SetLabelSize(0.1);
-    gr_out->GetYaxis()->SetLabelSize(0.1);
+    gr_out->GetXaxis()->SetLabelSize(0.05);
+    gr_out->GetYaxis()->SetLabelSize(0.05);
     
     return gr_out;
 }

@@ -347,9 +347,11 @@ void PzVsDiff_Psi_phi(){
         leg[iSub] = new TLegend();
         leg[iSub]->AddEntry(grCos_thetaVsdphi_20_50[iSub], "#Lambda", "p");
         leg[iSub]->AddEntry((TObject*)0, Form("p_{1} = %.3f #pm %.3f", r[iSub]->Value(1)*300/alpha_Lam/0.6 , r[iSub]->ParError(1)*300/alpha_Lam/0.6 ), "");
+        leg[iSub]->AddEntry((TObject*)0, Form("p_{2} = %.3f #pm %.3f", r[iSub]->Value(2)*300/alpha_Lam/0.6 , r[iSub]->ParError(2)*300/alpha_Lam/0.6 ), "");
         leg[iSub]->AddEntry((TObject*)0, Form("#chi^{2}/NDF = %.2f", r[iSub]->Chi2()/r[iSub]->Ndf()), "");
         leg[iSub]->AddEntry(grCos_thetaVsdphi_LamBar_20_50[iSub], "#bar{#Lambda}", "p");
         leg[iSub]->AddEntry((TObject*)0, Form("p_{1} = %.3f #pm %.3f", r_bar[iSub]->Value(1)*300/alpha_Lam/0.6, r_bar[iSub]->ParError(1)*300/alpha_Lam/0.6), "");
+        leg[iSub]->AddEntry((TObject*)0, Form("p_{2} = %.3f #pm %.3f", r_bar[iSub]->Value(2)*300/alpha_Lam/0.6, r_bar[iSub]->ParError(2)*300/alpha_Lam/0.6), "");
         leg[iSub]->AddEntry((TObject*)0, Form("#chi^{2}/NDF = %.2f", r_bar[iSub]->Chi2()/r_bar[iSub]->Ndf()), "");
         leg[iSub]->SetBorderSize(0);
     }
@@ -418,7 +420,7 @@ void PzVsDiff_Psi_phi(){
 
     fitFuncOfCos_Psi3->FixParameter(0, 0);
     fitFuncOfCos_Psi3->SetParLimits(1, -1, 1);
-    fitFuncOfCos_Psi3->FixParameter(2, 0);
+    //fitFuncOfCos_Psi3->FixParameter(2, 0);
 
     TF1 *FuncOfFourier_Psi3[1];
     TF1 *FuncOfFourier_Bar_Psi3[1];

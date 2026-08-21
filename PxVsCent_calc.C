@@ -35,8 +35,8 @@ const bool sinUsage = false;
 const bool mfitDr = false;
 
 //order of EP
-//const int nOrd = 2;
-const int nOrd = 3;
+const int nOrd = 2;
+//const int nOrd = 3;
 
 TGraphErrors* ConvertProfToGraph(TProfile* prof);
 TGraphErrors* GetCosTetaSub(TProfile* prof);
@@ -391,8 +391,8 @@ void PxVsCent_calc(){
 
     TCanvas *c[4];
     for(int i=0; i!=4; i++){
-        c[i] = new TCanvas(Form("c_%i", i), "", 0, 1024, 1200, 1024);
-        c[i]->Divide(3,3);
+        c[i] = new TCanvas(Form("c_%i", i), "", 0, 1024, 1100, 1024);
+        c[i]->Divide(3,3,0,0);
     }
     c[0]->SetTitle("Lambda, Psi_e/w");
     c[1]->SetTitle("Lambda, Psi_comb");
@@ -412,36 +412,76 @@ void PxVsCent_calc(){
     fitFuncOfCos->FixParameter(2, 0);
 
     double Px, Px_err;
+
+    TText tFit;
+    tFit.SetTextFont(42);
+
+    TLatex latFit;
+    latFit.SetTextFont(42);
+    latFit.SetTextSize(0.1);
     
     for(int iCent=0; iCent!=9; iCent++){
         for(int iSub=0; iSub!=2; iSub++){
 
             //Set Y titles
-            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetTitle("<cos(#phi_{#Lambda}-#Psi_{1})>");
-            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitle("<cos(#phi_{#bar{#Lambda}}-#Psi_{1})>");
+            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetTitle("<cos(#phi^{*}_{p}-#Psi_{1})>");
+            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitle("<cos(#phi^{*}_{#bar{p}}-#Psi_{1})>");
+            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetXaxis()->SetTitle(Form("#phi_{#Lambda} - #Psi_{%i}", nOrd));
+            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetXaxis()->SetTitle(Form("#phi_{#bar{#Lambda}} - #Psi_{%i}", nOrd));
+            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetXaxis()->SetTitleSize(0.08);
+            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetXaxis()->SetTitleSize(0.08);
+            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetXaxis()->SetLabelSize(0.08);
+            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetXaxis()->SetLabelSize(0.08);
+            if(nOrd == 3){
+                grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetXaxis()->SetNdivisions(505); 
+                grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetXaxis()->SetNdivisions(505);
+            }
 
-            if(iSub == 0){grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMinimum(-0.002); grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMaximum(0.0015);}
-            if(iSub == 1){grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMinimum(-0.002); grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMaximum(0.002);}
-            if(iSub == 0){grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.006); grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMaximum(0.006);}
-            if(iSub == 1){grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.005); grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMaximum(0.008);}
+            if(nOrd == 2){
+                if(iSub == 0){grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMinimum(-0.002); grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMaximum(0.0015);}
+                if(iSub == 1){grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMinimum(-0.002); grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMaximum(0.002);}
+                if(iSub == 0){grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.006); grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMaximum(0.006);}
+                if(iSub == 1){grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.005); grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMaximum(0.008);}
+            }
+
+            if(nOrd == 3){
+                if(iSub == 0){grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMinimum(-0.002); grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMaximum(0.0015);}
+                if(iSub == 1){grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMinimum(-0.002); grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetMaximum(0.002);}
+                if(iSub == 0){grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.006); grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMaximum(0.006);}
+                if(iSub == 1){grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMinimum(-0.005); grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetMaximum(0.008);}
+            }
 
             //Set graph titles
-            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetTitle(Form("#Lambda centrality, %i-%i", cent_lim[8-iCent], cent_lim[9-iCent]));
-            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetTitle(Form("#bar{#Lambda} centrality, %i-%i", cent_lim[8-iCent], cent_lim[9-iCent]));
+            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->SetTitle("");
+            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->SetTitle("");
             
 
             //Drawing           
 
             c[iSub]->cd(9-iCent);
-            if(iCent == 2 || iCent == 5 || iCent == 8){
-                gPad->SetLeftMargin(0.25);
-                gPad->SetRightMargin(0.02);
-                grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(1);
-                grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
-                grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetLabelSize(0.1);
-            }
+            gPad->SetBottomMargin(0.25);
+            gPad->SetLeftMargin(0.25);
+            gPad->SetRightMargin(0.02);
+            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(1);
+            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetTitleSize(0.08);
+            grCos_diffPhiPsi1Vsdphi[iCent][iSub]->GetYaxis()->SetLabelSize(0.08);
+
             grCos_diffPhiPsi1Vsdphi[iCent][iSub]->Fit("fitFuncOfCos");
             grCos_diffPhiPsi1Vsdphi[iCent][iSub]->Draw("AP");
+
+            if(nOrd == 2){
+                if(iCent == 4 && iSub == 0) latFit.DrawLatex(0.5, 0.001, Form("#Lambda, #Psi_{%i,ew}", nOrd));
+                if(iCent == 4 && iSub == 1) latFit.DrawLatex(1, 0.001, Form("#Lambda, #Psi_{%i,comb}", nOrd));
+                if(iSub == 0) tFit.DrawText(1, -0.0017, Form("Centrality, %i-%i %%", cent_lim[8-iCent], cent_lim[9-iCent]));
+                if(iSub == 1) tFit.DrawText(0.2, 0.0016, Form("Centrality, %i-%i %%", cent_lim[8-iCent], cent_lim[9-iCent]));
+            }
+
+            if(nOrd == 3){
+                if(iCent == 4 && iSub == 0) latFit.DrawLatex(0.2, -0.0015, Form("#Lambda, #Psi_{%i,ew}", nOrd));
+                if(iCent == 4 && iSub == 1) latFit.DrawLatex(1, -0.0015, Form("#Lambda, #Psi_{%i,comb}", nOrd));
+                if(iSub == 0) tFit.DrawText(1, -0.0018, Form("Centrality, %i-%i %%", cent_lim[8-iCent], cent_lim[9-iCent]));
+                if(iSub == 1) tFit.DrawText(0.5, 0.0015, Form("Centrality, %i-%i %%", cent_lim[8-iCent], cent_lim[9-iCent]));
+            }
             
             Px = fitFuncOfCos->GetParameter(1);
             Px_err = fitFuncOfCos->GetParError(1);
@@ -450,15 +490,29 @@ void PxVsCent_calc(){
 
 
             c[iSub+2]->cd(9-iCent);
-            if(iCent == 2 || iCent == 5 || iCent == 8){
-                gPad->SetLeftMargin(0.25);
-                gPad->SetRightMargin(0.02);
-                grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(1);
-                grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitleSize(0.1);
-                grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetLabelSize(0.1);
-            }
+            gPad->SetBottomMargin(0.25);
+            gPad->SetLeftMargin(0.25);
+            gPad->SetRightMargin(0.02);
+            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitleOffset(1);
+            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetTitleSize(0.08);
+            grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->GetYaxis()->SetLabelSize(0.08);
+
             grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->Draw("AP");
             grCos_diffPhiPsi1_LamBarVsdphi[iCent][iSub]->Fit("fitFuncOfCos");
+
+            if(nOrd==2){
+                if(iCent == 4 && iSub == 0) latFit.DrawLatex(1, -0.004, Form("#bar{#Lambda}, #Psi_{%i,ew}", nOrd));
+                if(iCent == 4 && iSub == 1) latFit.DrawLatex(1, 0.0035, Form("#bar{#Lambda}, #Psi_{%i,comb}", nOrd));
+                if(iSub == 0) tFit.DrawText(0.2, 0.005, Form("Centrality, %i-%i %%", cent_lim[8-iCent], cent_lim[9-iCent]));
+                if(iSub == 1) tFit.DrawText(0.4, 0.007, Form("Centrality, %i-%i %%", cent_lim[8-iCent], cent_lim[9-iCent]));
+            }
+
+            if(nOrd==3){
+                if(iCent == 4 && iSub == 0) latFit.DrawLatex(0.2, -0.004, Form("#bar{#Lambda}, #Psi_{%i,ew}", nOrd));
+                if(iCent == 4 && iSub == 1) latFit.DrawLatex(0.2, 0.003, Form("#bar{#Lambda}, #Psi_{%i,comb}", nOrd));
+                if(iSub == 0) tFit.DrawText(1, 0.005, Form("Centrality, %i-%i %%", cent_lim[8-iCent], cent_lim[9-iCent]));
+                if(iSub == 1) tFit.DrawText(1, 0.007, Form("Centrality, %i-%i %%", cent_lim[8-iCent], cent_lim[9-iCent]));
+            }
 
             Px = fitFuncOfCos->GetParameter(1);
             Px_err = fitFuncOfCos->GetParError(1);

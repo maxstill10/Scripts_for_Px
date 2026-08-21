@@ -108,7 +108,7 @@ void pic_forInvMm_drawing(){
     BackGround->SetLineColor(6);
     
     
-    InvMLamDist->SetTitle("Invariant mass of #Lambda");
+    InvMLamDist->SetTitle("");
     InvMLamDist->GetYaxis()->SetTitle("Entries");
     InvMLamDist->GetYaxis()->SetTitleFont(42);
     InvMLamDist->GetYaxis()->SetLabelFont(42);
@@ -170,7 +170,7 @@ void pic_forInvMm_drawing(){
     grSin_diffPhiPsi1->GetXaxis()->SetTitle("M_{inv}, [GeV/c^{2}]");
     grSin_diffPhiPsi1->GetXaxis()->SetTitleFont(42);
     grSin_diffPhiPsi1->GetXaxis()->SetLabelFont(42);
-    grSin_diffPhiPsi1->GetYaxis()->SetTitle("<sin(#Psi_{1} - #phi)>");
+    grSin_diffPhiPsi1->GetYaxis()->SetTitle("<sin(#Psi_{1} - #phi^{*}_{p})>");
     grSin_diffPhiPsi1->GetYaxis()->SetTitleFont(42);
     grSin_diffPhiPsi1->GetYaxis()->SetLabelFont(42);
     grSin_diffPhiPsi1->GetXaxis()->SetLabelSize(0.045);
@@ -185,7 +185,7 @@ void pic_forInvMm_drawing(){
 
     TLegend *leg_Draw = new TLegend();
     
-    leg_Draw->AddEntry(FitCosTetaFunc, "(1-f^{BG})p_{0} + f^{BG}(p_{1} + p_{2}M_{inv})", "l");
+    leg_Draw->AddEntry(FitCosTetaFunc, "(1-a^{BG})p_{0} + a^{BG}(p_{1} + p_{2}M_{inv})", "l");
     leg_Draw->AddEntry((TObject*)0, Form("p_{0} = %.4f #pm %.4f", r->Value(0), r->ParError(0)), "");
     leg_Draw->AddEntry((TObject*)0, Form("#chi^{2} = %.1f/NDF = %i", r->Chi2(), r->Ndf()), "");   
     
@@ -195,8 +195,8 @@ void pic_forInvMm_drawing(){
        
     TText t_1;
     t_1.SetTextFont(42);
-    t_1.DrawText(1.115, 0.04, "Centrality 30 - 40%");
-    tex.DrawLatex(1.115, 0.03, "#Delta#phi = (3#pi/6, 4#pi/6)");
+    //t_1.DrawText(1.115, 0.04, "Centrality 30 - 40%");
+    //tex.DrawLatex(1.115, 0.03, "#Delta#phi = (3#pi/6, 4#pi/6)");
 
 
 

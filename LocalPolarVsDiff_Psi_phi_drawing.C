@@ -507,8 +507,8 @@ void LocalPolarVsDiff_Psi_phi_drawing(){
         mgCos_theta_20_50[iSub]->Add(grCos_thetaVsdphi_20_50[iSub]);
         mgCos_theta_20_50[iSub]->Add(grCos_thetaVsdphi_LamBar_20_50[iSub]);
 
-        mgCos_theta_20_50[iSub]->GetXaxis()->SetTitle("#phi - #Psi_{2}");
-        mgCos_theta_20_50[iSub]->GetYaxis()->SetTitle("<cos(#phi_{#Lambda}-#Psi_{1})>");
+        mgCos_theta_20_50[iSub]->GetXaxis()->SetTitle("#phi_{#Lambda} - #Psi_{2}");
+        mgCos_theta_20_50[iSub]->GetYaxis()->SetTitle("<cos(#theta^{*}_{p})>");
 
         //Drawain params
         mgCos_theta_20_50[iSub]->GetYaxis()->SetTitleFont(42);
@@ -532,8 +532,8 @@ void LocalPolarVsDiff_Psi_phi_drawing(){
         mgCos_diffPhiPsi1_20_50[iSub]->Add(grCos_diffPhiPsi1Vsdphi_LamBar_20_50[iSub]);
 
 
-        mgCos_diffPhiPsi1_20_50[iSub]->GetXaxis()->SetTitle("#phi - #Psi_{2}");
-        mgCos_diffPhiPsi1_20_50[iSub]->GetYaxis()->SetTitle("<cos(#phi_{#Lambda}-#Psi_{1})>");
+        mgCos_diffPhiPsi1_20_50[iSub]->GetXaxis()->SetTitle("#phi_{#Lambda} - #Psi_{2}");
+        mgCos_diffPhiPsi1_20_50[iSub]->GetYaxis()->SetTitle("<cos(#phi_{p}-#Psi_{1})>");
 
         //Drawain params
         mgCos_diffPhiPsi1_20_50[iSub]->GetYaxis()->SetTitleFont(42);
@@ -675,8 +675,8 @@ void LocalPolarVsDiff_Psi_phi_drawing(){
         mgCos_diffPhiPsi1_20_50_Psi3[iSub]->Add(grCos_diffPhiPsi1Vsdphi_LamBar_20_50[2+iSub]);
 
 
-        mgCos_diffPhiPsi1_20_50_Psi3[iSub]->GetXaxis()->SetTitle("#phi - #Psi_{3}");
-        mgCos_diffPhiPsi1_20_50_Psi3[iSub]->GetYaxis()->SetTitle("<cos(#phi_{#Lambda}-#Psi_{1})>");
+        mgCos_diffPhiPsi1_20_50_Psi3[iSub]->GetXaxis()->SetTitle("#phi_{#Lambda} - #Psi_{3}");
+        mgCos_diffPhiPsi1_20_50_Psi3[iSub]->GetYaxis()->SetTitle("<cos(#phi^{*}_{p}-#Psi_{1})>");
 
         //Drawain params
         mgCos_diffPhiPsi1_20_50_Psi3[iSub]->GetYaxis()->SetTitleFont(42);
@@ -701,6 +701,10 @@ void LocalPolarVsDiff_Psi_phi_drawing(){
     TCanvas *can_psi2_psi3 = new TCanvas("can_psi2_psi3", "", 0, 1024, 1200, 900);
     can_psi2_psi3->Divide(2, 2, 0.0, 0.0);
     
+    TLatex ltex;
+    ltex.SetTextFont(42);
+    ltex.SetTextSize(0.1);
+    
     //
     can_psi2_psi3->cd(1);
 
@@ -710,7 +714,7 @@ void LocalPolarVsDiff_Psi_phi_drawing(){
     mgCos_theta_20_50[0]->Draw("AP");
 
     mgCos_theta_20_50[0]->GetXaxis()->SetTitle("#phi - #Psi_{2}");
-    mgCos_theta_20_50[0]->GetYaxis()->SetTitle("<cos(#theta)>");
+    mgCos_theta_20_50[0]->GetYaxis()->SetTitle("<cos(#theta^{*}_{p})>");
    
 
     funcOfZero->Draw("same");
@@ -722,7 +726,8 @@ void LocalPolarVsDiff_Psi_phi_drawing(){
     gPad->SetLeftMargin(0.2);
     gPad->SetBottomMargin(0);
     t.DrawText(1.5, 0.0013, "Centrality 20 - 50%");
-    tex.DrawLatex(1.5, 0.0011, "#Psi_{2, ew} was used");
+    tex.DrawLatex(1.5, 0.0011, "#Psi_{2} was used");
+    ltex.DrawLatex(2.6, -0.0012, "P_{z}");
 
 
     //
@@ -738,7 +743,8 @@ void LocalPolarVsDiff_Psi_phi_drawing(){
     gPad->SetRightMargin(0.2);
     gPad->SetBottomMargin(0);
     t.DrawText(0.9, 0.0013, "Centrality 20 - 50%");
-    tex.DrawLatex(0.9, 0.0011, "#Psi_{3, ew} was used");
+    tex.DrawLatex(0.9, 0.0011, "#Psi_{3} was used");
+    ltex.DrawLatex(1.7, -0.0012, "P_{z}");
 
     //
     can_psi2_psi3->cd(3);
@@ -754,7 +760,8 @@ void LocalPolarVsDiff_Psi_phi_drawing(){
     gPad->SetLeftMargin(0.2);
     gPad->SetTopMargin(0);
     t.DrawText(1.5, 0.0025, "Centrality 20 - 50%");
-    tex.DrawLatex(1.5, 0.002, "#Psi_{2, ew} was used");
+    tex.DrawLatex(1.5, 0.002, "#Psi_{2} was used");
+    ltex.DrawLatex(2.6, -0.0028, "P_{x}");
 
     //
     can_psi2_psi3->cd(4);
@@ -769,7 +776,8 @@ void LocalPolarVsDiff_Psi_phi_drawing(){
     gPad->SetRightMargin(0.2);
     gPad->SetTopMargin(0);
     t.DrawText(1, 0.0025, "Centrality 20 - 50%");
-    tex.DrawLatex(1, 0.002, "#Psi_{3, ew} was used");
+    tex.DrawLatex(1, 0.002, "#Psi_{3} was used");
+    ltex.DrawLatex(1.7, -0.0028, "P_{x}");
 
 }
 

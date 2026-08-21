@@ -141,6 +141,51 @@ void comparingPhVsCent(){
     funcOfZero->Draw("same");
     leg_Second_Third->Draw("same");
 
+    //
+
+    TMultiGraph *MgPolar_HVsCent = new TMultiGraph();
+    
+    MgPolar_HVsCent->Add(P_HVsCent);
+    MgPolar_HVsCent->Add(P_HVsCentEgorik);
+    MgPolar_HVsCent->Add(P_HVsCentChinese);
+    
+    MgPolar_HVsCent->SetTitle("<P_{H}> of #Lambda Vs Centrality");
+    MgPolar_HVsCent->GetXaxis()->SetTitle("Centrality, %");
+    MgPolar_HVsCent->GetYaxis()->SetTitle("<P_{H}>, %");
+    
+
+    MgPolar_HVsCent->Draw("AP");
+    funcOfZero->Draw("same");
+
+    legend->AddEntry(P_HVsCent, "This research", "p");
+    legend->AddEntry(P_HVsCentEgorik, "Egor research", "p");
+    legend->AddEntry(P_HVsCentChinese, "Chinese research", "p");
+    legend->Draw("same");
+
+    TCanvas *can1 = new TCanvas("can1", "can1", 0, 1024, 1800, 1024);
+    can1->cd();
+
+    TLegend *legendBar = new TLegend();
+    TMultiGraph *MgPolar_HBarVsCent = new TMultiGraph();
+    
+    MgPolar_HBarVsCent->Add(P_HVsCentBar);
+    MgPolar_HBarVsCent->Add(P_HVsCentBarEgorik);
+    MgPolar_HBarVsCent->Add(P_HVsCentBarChinese);
+    
+    MgPolar_HBarVsCent->SetTitle("<P_{H}> of #bar{#Lambda} Vs Centrality");
+    MgPolar_HBarVsCent->GetXaxis()->SetTitle("Centrality, %");
+    MgPolar_HBarVsCent->GetYaxis()->SetTitle("<P_{H}>, %");
+    
+
+    MgPolar_HBarVsCent->Draw("AP");
+    funcOfZero->Draw("same");
+
+    legendBar->AddEntry(P_HVsCentBar, "This research", "p");
+    legendBar->AddEntry(P_HVsCentBarEgorik, "Egor research", "p");
+    legendBar->AddEntry(P_HVsCentBarChinese, "Chinese research", "p");
+    legendBar->Draw("same");
+
+
     
 }
 

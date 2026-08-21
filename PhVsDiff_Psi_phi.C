@@ -368,8 +368,8 @@ void PhVsDiff_Psi_phi(){
         mgSin_diffPhiPsi1_20_50[iSub]->Add(grSin_diffPhiPsi1Vsdphi_LamBar_20_50[iSub]);
 
 
-        mgSin_diffPhiPsi1_20_50[iSub]->GetXaxis()->SetTitle("#phi - #Psi_{2}");
-        mgSin_diffPhiPsi1_20_50[iSub]->GetYaxis()->SetTitle("<sin(#Psi_{1} - #phi)>");
+        mgSin_diffPhiPsi1_20_50[iSub]->GetXaxis()->SetTitle("#phi_{#Lambda} - #Psi_{2}");
+        mgSin_diffPhiPsi1_20_50[iSub]->GetYaxis()->SetTitle("<sin(#Psi_{1} - #phi^{*}_{p})>");
 
         mgSin_diffPhiPsi1_20_50[iSub]->SetMinimum(0);
         mgSin_diffPhiPsi1_20_50[iSub]->SetMaximum(0.005);
@@ -499,7 +499,7 @@ void PhVsDiff_Psi_phi(){
         mgSin_diffPhiPsi1_20_50_Psi3[iSub]->Add(grSin_diffPhiPsi1Vsdphi_LamBar_20_50[2+iSub]);
 
 
-        mgSin_diffPhiPsi1_20_50_Psi3[iSub]->GetXaxis()->SetTitle("#phi - #Psi_{3}");
+        mgSin_diffPhiPsi1_20_50_Psi3[iSub]->GetXaxis()->SetTitle("#phi_{#Lambda} - #Psi_{3}");
         mgSin_diffPhiPsi1_20_50_Psi3[iSub]->GetYaxis()->SetTitle("<sin(#Psi_{1} - #phi)>");
 
         mgSin_diffPhiPsi1_20_50_Psi3[iSub]->SetMinimum(0);
@@ -551,6 +551,9 @@ void PhVsDiff_Psi_phi(){
 
     TCanvas *can_psi2_psi3 = new TCanvas("can_psi2_psi3", "", 0, 1024, 1800, 900);
     can_psi2_psi3->Divide(2, 1, 0.0, 0.0);
+
+    TLatex ltex;
+    ltex.SetTextFont(42);
     
     //
     can_psi2_psi3->cd(1);
@@ -567,7 +570,7 @@ void PhVsDiff_Psi_phi(){
     gPad->SetRightMargin(0);
     gPad->SetLeftMargin(0.2);
     t.DrawText(1.5, 0.0009, "Centrality 20 - 50%");
-    t.DrawText(1.5, 0.0005, "Psi_e/w was used");
+    ltex.DrawLatex(1.5, 0.0005, "#Psi_{2} was used");
 
     //
     can_psi2_psi3->cd(2);
@@ -585,7 +588,7 @@ void PhVsDiff_Psi_phi(){
     gPad->SetLeftMargin(0);
     gPad->SetRightMargin(0.2);
     t.DrawText(1, 0.0009, "Centrality 20 - 50%");
-    t.DrawText(1, 0.0005, "Psi_e/w was used");
+    ltex.DrawLatex(1, 0.0005, "#Psi_{3} was used");
 
 }
 
